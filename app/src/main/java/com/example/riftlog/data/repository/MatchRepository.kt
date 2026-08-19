@@ -12,9 +12,14 @@ import com.example.riftlog.domain.model.MatchSummary
 
 private const val LIVE_DATA_TTL_MILLIS = 5 * 60 * 1000L
 
-/** A page of match summaries. [hasMore] reflects whether Riot's match-id list itself was full
- * (i.e. `count` ids came back from the API), not just whether the cached/filtered result happens
- * to be full - so pagination stays accurate even when the player has exactly `count` total games. */
+/** A page of match summaries. [hasMore] reflects whether Riot's match-id list itself came back
+ * full (`count` ids), not the size of the locally cached/filtered result after participants that
+ * couldn't be matched get dropped - the previous version could hide "load more" while pages still
+ * existed, because a few filtered-out matches made the final list come up short of `count` even
+ * though more data was available. This is still a "got a full page, so assume there might be
+ * more" heuristic, not a lookahead - a player with *exactly* `count` remaining games will still
+ * show one extra (now-empty) "load more" tap before hasMore turns false, same tradeoff most
+ * offset-based pagination makes. */
 data class MatchPage(val matches: List<MatchSummary>, val hasMore: Boolean)
 
 /** Fetches match ids + details and computes per-champion aggregates from the cached window. */

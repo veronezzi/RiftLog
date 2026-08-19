@@ -1,4 +1,4 @@
-﻿package com.example.riftlog.ui.builds
+package com.example.riftlog.ui.builds
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

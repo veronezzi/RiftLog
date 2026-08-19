@@ -1,4 +1,4 @@
-﻿package com.example.riftlog.ui.championstats
+package com.example.riftlog.ui.championstats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

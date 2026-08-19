@@ -1,4 +1,4 @@
-﻿package com.example.riftlog.ui.matchhistory
+package com.example.riftlog.ui.matchhistory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,10 +40,14 @@ class MatchHistoryViewModel(
     private var requestedCount = PAGE_SIZE
 
     init {
-        load()
+        load(forceRefresh = false)
     }
 
-    fun retry() = load()
+    // Always bypasses the cache: a retry after an error can otherwise land on a TTL-fresh but
+    // partial page (a mid-fetch failure persists whatever it got before propagating the error),
+    // silently "succeeding" with an incomplete match list for up to 5 minutes instead of
+    // actually trying the network again.
+    fun retry() = load(forceRefresh = true)
 
     fun loadMore() {
         val state = _uiState.value
@@ -52,7 +56,7 @@ class MatchHistoryViewModel(
         fetchMatches(forceRefresh = true, isLoadingMore = true)
     }
 
-    private fun load() {
+    private fun load(forceRefresh: Boolean) {
         _uiState.value = MatchHistoryUiState.Loading
         requestedCount = PAGE_SIZE
         viewModelScope.launch {
@@ -63,7 +67,7 @@ class MatchHistoryViewModel(
             }
             puuid = lastProfile.puuid
             platformRegion = lastProfile.platformRegion
-            fetchMatches(forceRefresh = false, isLoadingMore = false)
+            fetchMatches(forceRefresh = forceRefresh, isLoadingMore = false)
         }
     }
 

@@ -1,4 +1,4 @@
-﻿package com.example.riftlog.ui.profile
+package com.example.riftlog.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -47,21 +47,24 @@ class ProfileViewModel(
     val uiState: StateFlow<ProfileUiState> = _uiState
 
     init {
-        load()
+        load(forceRefresh = false)
     }
 
-    fun retry() = load()
+    // Bypasses the cache: otherwise a retry right after a mid-fetch match-list failure can land
+    // on the partial page that failure already persisted (still TTL-fresh) instead of actually
+    // hitting the network again. See MatchHistoryViewModel.retry() for the same fix.
+    fun retry() = load(forceRefresh = true)
 
-    private fun load() {
+    private fun load(forceRefresh: Boolean) {
         _uiState.value = ProfileUiState.Loading
         viewModelScope.launch {
-            when (val result = profileRepository.getProfile(gameName, tagLine, platformRegion)) {
+            when (val result = profileRepository.getProfile(gameName, tagLine, platformRegion, forceRefresh)) {
                 is ApiResult.Error -> _uiState.value = ProfileUiState.Error(result)
                 is ApiResult.Success -> {
                     val profile = result.data
                     settingsRepository.setLastProfile(profile.puuid, profile.platformRegion)
                     val matchesResult = matchRepository.getRecentMatches(
-                        profile.puuid, profile.platformRegion, count = RECENT_MATCH_COUNT
+                        profile.puuid, profile.platformRegion, count = RECENT_MATCH_COUNT, forceRefresh = forceRefresh
                     )
                     val recentForm = (matchesResult as? ApiResult.Success)?.data?.matches?.let(::toAggregate)
                     val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
