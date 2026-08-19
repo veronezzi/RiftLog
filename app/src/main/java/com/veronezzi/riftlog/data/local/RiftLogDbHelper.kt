@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper
  * plugin can't be applied under AGP 9 either), so this app does the couple of tables by hand
  * instead - same shape (a few tables + a timestamp column per row), no annotation processor.
  */
-class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db", null, 1) {
+class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db", null, 2) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
@@ -59,6 +59,9 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
                 item4 INTEGER NOT NULL,
                 item5 INTEGER NOT NULL,
                 item6 INTEGER NOT NULL,
+                primaryStyleId INTEGER NOT NULL DEFAULT 0,
+                subStyleId INTEGER NOT NULL DEFAULT 0,
+                keystoneId INTEGER NOT NULL DEFAULT 0,
                 summoner1Id INTEGER NOT NULL,
                 summoner2Id INTEGER NOT NULL,
                 teamPosition TEXT NOT NULL,
@@ -96,7 +99,13 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // No prior versions yet.
+        if (oldVersion < 2) {
+            // Rune data added to the per-match cache row; existing rows default to "no rune data",
+            // same as any other pre-migration match that hasn't been re-fetched yet.
+            db.execSQL("ALTER TABLE cached_matches ADD COLUMN primaryStyleId INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE cached_matches ADD COLUMN subStyleId INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE cached_matches ADD COLUMN keystoneId INTEGER NOT NULL DEFAULT 0")
+        }
     }
 
     /** Wipes every cache table. Used by Settings' "clear cached data" action. */

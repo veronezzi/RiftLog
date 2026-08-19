@@ -8,6 +8,9 @@ data class MatchSummary(
     val assists: Int,
     val win: Boolean,
     val items: List<Int>, // item0..item6, zeros mean empty slot
+    val primaryStyleId: Int,
+    val subStyleId: Int,
+    val keystoneId: Int,
     val summoner1Id: Int,
     val summoner2Id: Int,
     val teamPosition: String,
@@ -25,6 +28,9 @@ data class ChampionAggregate(
     val avgDeaths: Double,
     val avgAssists: Double,
     val recommendedBuild: List<Int>,
+    val recommendedPrimaryStyleId: Int,
+    val recommendedSubStyleId: Int,
+    val recommendedKeystoneId: Int,
 ) {
     val losses: Int get() = gamesPlayed - wins
     val winRate: Double get() = if (gamesPlayed == 0) 0.0 else wins.toDouble() / gamesPlayed

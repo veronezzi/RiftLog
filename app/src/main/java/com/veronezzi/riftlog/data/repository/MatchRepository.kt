@@ -91,6 +91,12 @@ class MatchRepository(
             .eachCount()
         val recommendedBuild = itemSetCounts.maxByOrNull { it.value }?.key ?: emptyList()
 
+        val runePageCounts = matches
+            .map { Triple(it.primaryStyleId, it.subStyleId, it.keystoneId) }
+            .groupingBy { it }
+            .eachCount()
+        val recommendedRunePage = runePageCounts.maxByOrNull { it.value }?.key
+
         return ChampionAggregate(
             championName = championName,
             gamesPlayed = matches.size,
@@ -99,6 +105,9 @@ class MatchRepository(
             avgDeaths = matches.map { it.deaths }.average(),
             avgAssists = matches.map { it.assists }.average(),
             recommendedBuild = recommendedBuild,
+            recommendedPrimaryStyleId = recommendedRunePage?.first ?: 0,
+            recommendedSubStyleId = recommendedRunePage?.second ?: 0,
+            recommendedKeystoneId = recommendedRunePage?.third ?: 0,
         )
     }
 
@@ -123,6 +132,9 @@ class MatchRepository(
         item4 = item4,
         item5 = item5,
         item6 = item6,
+        primaryStyleId = perks.styles.firstOrNull { it.description == "primary" }?.style ?: 0,
+        subStyleId = perks.styles.firstOrNull { it.description == "sub" }?.style ?: 0,
+        keystoneId = perks.styles.firstOrNull { it.description == "primary" }?.selections?.firstOrNull()?.perk ?: 0,
         summoner1Id = summoner1Id,
         summoner2Id = summoner2Id,
         teamPosition = teamPosition,
@@ -141,6 +153,9 @@ class MatchRepository(
         assists = assists,
         win = win,
         items = listOf(item0, item1, item2, item3, item4, item5, item6),
+        primaryStyleId = primaryStyleId,
+        subStyleId = subStyleId,
+        keystoneId = keystoneId,
         summoner1Id = summoner1Id,
         summoner2Id = summoner2Id,
         teamPosition = teamPosition,

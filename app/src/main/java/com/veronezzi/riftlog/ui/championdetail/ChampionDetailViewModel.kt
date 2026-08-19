@@ -8,8 +8,11 @@ import com.veronezzi.riftlog.data.repository.ProBuildRepository
 import com.veronezzi.riftlog.data.settings.SettingsRepository
 import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
+import com.veronezzi.riftlog.domain.model.ChampionAggregate
 import com.veronezzi.riftlog.domain.model.ChampionDetail
 import com.veronezzi.riftlog.domain.model.ProBuild
+import com.veronezzi.riftlog.domain.model.RuneCatalog
+import com.veronezzi.riftlog.domain.model.RunePageInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -21,6 +24,7 @@ sealed class ChampionDetailUiState {
     data class Success(
         val detail: ChampionDetail,
         val recommendedBuild: List<Int>?,
+        val recommendedRunes: RunePageInfo?,
         val proBuild: ProBuild?,
         val proBuildFailed: Boolean,
         val ddragonVersion: String,
@@ -63,12 +67,19 @@ class ChampionDetailViewModel(
             when (val detailResult = championRepository.getChampionDetail(version, championId, championInfo)) {
                 is ApiResult.Error -> _uiState.value = ChampionDetailUiState.Error(detailResult)
                 is ApiResult.Success -> {
-                    val recommendedBuild = puuid?.let { matchRepository.getChampionAggregate(it, championId) }
-                        ?.recommendedBuild
+                    val aggregate = puuid?.let { matchRepository.getChampionAggregate(it, championId) }
+                    val runeCatalogResult = championRepository.getRunes(version)
+                    val runeCatalog = (runeCatalogResult as? ApiResult.Success)?.data
+                    val recommendedRunes = if (aggregate != null && runeCatalog != null) {
+                        buildRunePageInfo(aggregate, runeCatalog)
+                    } else {
+                        null
+                    }
                     val proBuildResult = proBuildRepository.getProBuild(championInfo.name, version)
                     _uiState.value = ChampionDetailUiState.Success(
                         detail = detailResult.data,
-                        recommendedBuild = recommendedBuild,
+                        recommendedBuild = aggregate?.recommendedBuild,
+                        recommendedRunes = recommendedRunes,
                         proBuild = (proBuildResult as? ApiResult.Success)?.data,
                         proBuildFailed = proBuildResult is ApiResult.Error,
                         ddragonVersion = version,
@@ -76,5 +87,16 @@ class ChampionDetailViewModel(
                 }
             }
         }
+    }
+
+    /** Null when the aggregate has no games (nothing to recommend) or a rune id it stored doesn't
+     * resolve against the current catalog - a version mismatch between cached match rows and the
+     * live ddragon version, which self-heals once matches get re-fetched. */
+    private fun buildRunePageInfo(aggregate: ChampionAggregate, catalog: RuneCatalog): RunePageInfo? {
+        if (aggregate.recommendedKeystoneId == 0) return null
+        val primaryStyle = catalog.stylesById[aggregate.recommendedPrimaryStyleId] ?: return null
+        val subStyle = catalog.stylesById[aggregate.recommendedSubStyleId] ?: return null
+        val keystone = catalog.runesById[aggregate.recommendedKeystoneId] ?: return null
+        return RunePageInfo(primaryStyle, subStyle, keystone)
     }
 }
