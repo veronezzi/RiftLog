@@ -41,5 +41,12 @@
             android:layout_marginTop="@dimen/spacing_sm"
             android:text="@string/settings_clear_cache" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xl"
+            android:text="@string/settings_riot_disclaimer"
+            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall" />
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

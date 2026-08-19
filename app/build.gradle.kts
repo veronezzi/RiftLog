@@ -16,12 +16,21 @@ val localProperties = Properties().apply {
 }
 val riotApiKey: String = localProperties.getProperty("RIOT_API_KEY", "")
 
+// Release signing, same local.properties pattern as RIOT_API_KEY above - never hardcoded,
+// never committed. The keystore file itself must also stay out of git (see .gitignore).
+// Missing on a fresh checkout is expected (debug builds don't need it) - only assembleRelease
+// / bundleRelease should fail, with a clear message instead of a cryptic signing error.
+val releaseSigningKeys = listOf(
+    "RELEASE_STORE_FILE", "RELEASE_STORE_PASSWORD", "RELEASE_KEY_ALIAS", "RELEASE_KEY_PASSWORD"
+)
+val hasReleaseSigning = releaseSigningKeys.all { !localProperties.getProperty(it).isNullOrBlank() }
+
 android {
-    namespace = "com.example.riftlog"
+    namespace = "com.veronezzi.riftlog"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.example.riftlog"
+        applicationId = "com.veronezzi.riftlog"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
@@ -31,9 +40,23 @@ android {
         buildConfigField("String", "RIOT_API_KEY", "\"$riotApiKey\"")
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = rootProject.file(localProperties.getProperty("RELEASE_STORE_FILE"))
+                storePassword = localProperties.getProperty("RELEASE_STORE_PASSWORD")
+                keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS")
+                keyPassword = localProperties.getProperty("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -48,6 +71,21 @@ android {
         viewBinding = true
         buildConfig = true
     }
+}
+
+if (!hasReleaseSigning) {
+    tasks.matching { it.name.startsWith("assembleRelease") || it.name.startsWith("bundleRelease") }
+        .configureEach {
+            doFirst {
+                error(
+                    "Release build needs RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, " +
+                        "RELEASE_KEY_ALIAS and RELEASE_KEY_PASSWORD set in local.properties " +
+                        "(generate a keystore with keytool -genkeypair -v -keystore " +
+                        "release-keystore.jks -alias riftlog -keyalg RSA -keysize 2048 " +
+                        "-validity 10000)."
+                )
+            }
+        }
 }
 
 dependencies {

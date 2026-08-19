@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.riftlog.ui.home.HomeFragment"
+        android:name="com.veronezzi.riftlog.ui.home.HomeFragment"
         android:label="@string/nav_home">
         <action
             android:id="@+id/action_home_to_profile"
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.riftlog.ui.profile.ProfileFragment"
+        android:name="com.veronezzi.riftlog.ui.profile.ProfileFragment"
         android:label="@string/nav_profile">
         <argument android:name="gameName" app:argType="string" />
         <argument android:name="tagLine" app:argType="string" />
@@ -42,12 +42,12 @@
 
     <fragment
         android:id="@+id/matchHistoryFragment"
-        android:name="com.example.riftlog.ui.matchhistory.MatchHistoryFragment"
+        android:name="com.veronezzi.riftlog.ui.matchhistory.MatchHistoryFragment"
         android:label="@string/nav_match_history" />
 
     <fragment
         android:id="@+id/championStatsFragment"
-        android:name="com.example.riftlog.ui.championstats.ChampionStatsFragment"
+        android:name="com.veronezzi.riftlog.ui.championstats.ChampionStatsFragment"
         android:label="@string/nav_champion_stats">
         <action
             android:id="@+id/action_championStats_to_championDetail"
@@ -60,7 +60,7 @@
 
     <fragment
         android:id="@+id/buildsFragment"
-        android:name="com.example.riftlog.ui.builds.BuildsFragment"
+        android:name="com.veronezzi.riftlog.ui.builds.BuildsFragment"
         android:label="@string/nav_builds">
         <action
             android:id="@+id/action_builds_to_championDetail"
@@ -73,14 +73,14 @@
 
     <fragment
         android:id="@+id/championDetailFragment"
-        android:name="com.example.riftlog.ui.championdetail.ChampionDetailFragment"
+        android:name="com.veronezzi.riftlog.ui.championdetail.ChampionDetailFragment"
         android:label="@string/nav_champion_detail">
         <argument android:name="championId" app:argType="string" />
     </fragment>
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.example.riftlog.ui.settings.SettingsFragment"
+        android:name="com.veronezzi.riftlog.ui.settings.SettingsFragment"
         android:label="@string/nav_settings" />
 
 </navigation>

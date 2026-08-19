@@ -85,6 +85,7 @@
     <string name="settings_clear_cache_done">Cache limpo</string>
     <string name="settings_save">Salvar</string>
     <string name="settings_saved">Configurações salvas</string>
+    <string name="settings_riot_disclaimer">RiftLog não é endossado pela Riot Games e não reflete as opiniões da Riot Games ou de qualquer pessoa oficialmente envolvida na produção ou gestão de League of Legends. League of Legends e Riot Games são marcas registradas da Riot Games, Inc.</string>
 
     <!-- Builds -->
     <string name="builds_search_hint">Buscar campeão</string>
