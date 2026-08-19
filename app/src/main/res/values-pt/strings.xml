@@ -1,0 +1,93 @@
+<resources>
+    <string name="app_name">RiftLog</string>
+
+    <string name="nav_home">Início</string>
+    <string name="nav_match_history">Partidas</string>
+    <string name="nav_champion_stats">Campeões</string>
+    <string name="nav_builds">Builds</string>
+    <string name="nav_settings">Configurações</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="nav_champion_detail">Campeão</string>
+    <string name="action_settings">Configurações</string>
+    <string name="action_back">Voltar</string>
+
+    <!-- Home -->
+    <string name="home_title">RiftLog</string>
+    <string name="home_riot_id_hint">Riot ID (NomeDoJogo#TAG)</string>
+    <string name="home_search_button">Buscar</string>
+    <string name="home_region_label">Região</string>
+    <string name="home_recent_label">Recentes</string>
+    <string name="home_error_invalid_riot_id">Digite seu Riot ID no formato NomeDoJogo#TAG</string>
+    <string name="home_unpin_profile">Remover perfil fixado</string>
+
+    <!-- Profile -->
+    <string name="profile_level_format">Nível %d</string>
+    <string name="profile_solo_duo">Ranqueada Solo/Duo</string>
+    <string name="profile_flex">Ranqueada Flex</string>
+    <string name="profile_unranked">Sem classificação</string>
+    <string name="profile_record_format">%1$dV %2$dD · %3$d%% de vitórias</string>
+    <string name="profile_lp_format">%d LP</string>
+    <string name="profile_stat_winrate">Taxa de vitórias</string>
+    <string name="profile_stat_kda">KDA médio</string>
+    <string name="profile_stat_games">Partidas</string>
+    <string name="profile_view_match_history">Histórico de Partidas</string>
+    <string name="profile_view_champion_stats">Estatísticas de Campeões</string>
+    <string name="profile_recent_games_label">Últimas %d partidas</string>
+
+    <!-- Errors -->
+    <string name="error_invalid_api_key_title">Erro de configuração</string>
+    <string name="error_invalid_api_key_message">Este build não está configurado corretamente. Tente novamente mais tarde.</string>
+    <string name="error_summoner_not_found_title">Invocador não encontrado</string>
+    <string name="error_summoner_not_found_message">Nenhuma conta encontrada com esse Riot ID nessa região. Confira a grafia e a região selecionada.</string>
+    <string name="error_network_title">Sem conexão</string>
+    <string name="error_network_message">Não foi possível acessar os servidores da Riot. Verifique sua conexão com a internet e tente novamente.</string>
+    <string name="error_rate_limited_title">Limite de requisições atingido</string>
+    <string name="error_rate_limited_message">Muitas requisições em pouco tempo. Espere um momento e tente novamente.</string>
+    <string name="error_unknown_title">Algo deu errado</string>
+    <string name="error_unknown_message">Ocorreu um erro inesperado. Tente novamente.</string>
+    <string name="action_retry">Tentar novamente</string>
+
+    <!-- Match history -->
+    <string name="match_history_empty_title">Nenhuma partida encontrada ainda</string>
+    <string name="match_history_empty_message">Busque um invocador na tela inicial para carregar o histórico de partidas.</string>
+    <string name="match_history_load_more">Carregar mais</string>
+    <string name="match_gold_format">%.1fk de ouro</string>
+
+    <!-- Champion stats -->
+    <string name="champion_stats_empty_title">Nenhum dado de campeão ainda</string>
+    <string name="champion_stats_empty_message">Busque um invocador na tela inicial para ver as estatísticas de campeões.</string>
+    <string name="sort_by_mastery">Maestria</string>
+    <string name="sort_by_winrate">Taxa de vitórias</string>
+    <string name="sort_by_games">Partidas</string>
+    <string name="champion_mastery_points_format">%,d pontos de maestria</string>
+    <string name="champion_mastery_no_recent_games">Nenhuma partida recente</string>
+    <string name="champion_mastery_summary_format">%1$d partidas · %2$d%% de vitórias · %3$s KDA</string>
+
+    <!-- Champion detail -->
+    <string name="label_abilities">Habilidades</string>
+    <string name="champion_stat_hp">HP</string>
+    <string name="champion_stat_mp">MP</string>
+    <string name="champion_stat_armor">Armadura</string>
+    <string name="champion_stat_mr">Resistência Mágica</string>
+    <string name="champion_stat_ad">Dano de Ataque</string>
+    <string name="champion_stat_as">Velocidade de Ataque</string>
+    <string name="champion_stat_ms">Velocidade de Movimento</string>
+    <string name="champion_recommended_build_label">Build recomendada, baseada nas suas partidas recentes com esse campeão</string>
+    <string name="champion_no_recent_games">Ainda não há partidas recentes com esse campeão, então não há build para sugerir.</string>
+    <string name="champion_pro_build_header">Build de jogador profissional</string>
+    <string name="champion_pro_build_label">Build de jogador profissional, baseada em %d partidas oficiais recentes</string>
+    <string name="champion_pro_build_unavailable">Nenhuma partida profissional recente encontrada com esse campeão.</string>
+    <string name="champion_pro_build_failed">Não foi possível carregar os dados da build profissional agora. Tente novamente mais tarde.</string>
+
+    <!-- Settings -->
+    <string name="settings_region_label">Região padrão</string>
+    <string name="settings_clear_cache">Limpar dados em cache</string>
+    <string name="settings_clear_cache_done">Cache limpo</string>
+    <string name="settings_save">Salvar</string>
+    <string name="settings_saved">Configurações salvas</string>
+
+    <!-- Builds -->
+    <string name="builds_search_hint">Buscar campeão</string>
+    <string name="builds_empty_title">Nenhum campeão encontrado</string>
+    <string name="builds_empty_message">Tente outra grafia.</string>
+</resources>
