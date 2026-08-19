@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wraps the library's match-history-row component (view_match_history_item) with the app's
+     own expand-on-tap detail row (CS / gold / duration), which the design system doesn't have a
+     slot for. Win/loss stroke color on the included card is set at runtime by MatchAdapter,
+     since the result is match data, not a design token (see the comment inside
+     view_match_history_item.xml itself). -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_sm"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/matchHistoryItem"
+        layout="@layout/view_match_history_item" />
+
+    <LinearLayout
+        android:id="@+id/detailRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/detailCs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+            tools:text="187 CS" />
+
+        <TextView
+            android:id="@+id/detailGold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+            tools:text="14.2k gold" />
+
+        <TextView
+            android:id="@+id/detailDuration"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+            tools:text="28m 14s" />
+    </LinearLayout>
+</LinearLayout>

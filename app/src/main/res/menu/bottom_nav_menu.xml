@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/ic_home"
+        android:title="@string/nav_home" />
+    <item
+        android:id="@+id/matchHistoryFragment"
+        android:icon="@drawable/ic_history"
+        android:title="@string/nav_match_history" />
+    <item
+        android:id="@+id/championStatsFragment"
+        android:icon="@drawable/ic_champion"
+        android:title="@string/nav_champion_stats" />
+    <item
+        android:id="@+id/buildsFragment"
+        android:icon="@drawable/ic_build"
+        android:title="@string/nav_builds" />
+</menu>

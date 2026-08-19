@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wraps the library's champion-mastery-card component (view_champion_mastery_card) with the
+     app's own aggregate-stats summary line (games / winrate / KDA), which the design system
+     card has no slot for. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_sm"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/masteryCard"
+        layout="@layout/view_champion_mastery_card" />
+
+    <TextView
+        android:id="@+id/aggregateSummary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginTop="@dimen/spacing_xxs"
+        android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+        tools:text="12 games · 58% winrate · 4.2 KDA" />
+
+</LinearLayout>

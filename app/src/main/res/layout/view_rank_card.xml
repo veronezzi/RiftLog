@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Local stand-in for the design system's view_rank_card.xml (not shipped in v1.0.1 on
+     JitPack). Same token conventions; swap to the library layout once published. -->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="@style/Widget.RiftTracker.CardView">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_lg">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/queueLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="@style/TextAppearance.RiftTracker.LabelUppercase"
+                tools:text="Ranked Solo/Duo" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/tierChip"
+                style="@style/Widget.RiftTracker.Chip.Rank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/rift_on_accent"
+                tools:text="Gold II" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/lpText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:textAppearance="@style/TextAppearance.RiftTracker.StatValue"
+            tools:text="47 LP" />
+
+        <TextView
+            android:id="@+id/recordText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xxs"
+            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+            tools:text="24W 18L · 57% winrate" />
+
+        <ProgressBar
+            android:id="@+id/winrateBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:max="100"
+            android:progressDrawable="@drawable/progress_winrate"
+            tools:progress="57" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

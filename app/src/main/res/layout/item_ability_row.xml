@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The library's Widget.RiftTracker.AbilityBadge is a text badge for the ability key letter
+     (see rift-tracker-design-system's activity_design_system_preview.xml, P/Q/W/E/R demo), so
+     it's applied to abilityKey here. There's no design-system equivalent for a frame around a
+     loaded ability icon image, so abilityIcon keeps the local Widget.RiftLog.AbilityIconFrame
+     style for that one gap. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_md"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/abilityIcon"
+        style="@style/Widget.RiftLog.AbilityIconFrame"
+        android:contentDescription="@null" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/abilityKey"
+            style="@style/Widget.RiftTracker.AbilityBadge"
+            tools:text="Q" />
+
+        <TextView
+            android:id="@+id/abilityName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xxs"
+            android:textAppearance="@style/TextAppearance.RiftTracker.Body"
+            tools:text="Orb of Deception" />
+
+        <TextView
+            android:id="@+id/abilityDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xxs"
+            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+            tools:text="Ahri sends out and pulls back her orb, dealing damage on the way out and magic damage on the way back." />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,88 @@
+<resources>
+    <string name="app_name">RiftLog</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_match_history">Matches</string>
+    <string name="nav_champion_stats">Champions</string>
+    <string name="nav_builds">Builds</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_champion_detail">Champion</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_back">Back</string>
+
+    <!-- Home -->
+    <string name="home_title">RiftLog</string>
+    <string name="home_riot_id_hint">Riot ID (GameName#Tag)</string>
+    <string name="home_search_button">Search</string>
+    <string name="home_region_label">Region</string>
+    <string name="home_recent_label">Recent</string>
+    <string name="home_error_invalid_riot_id">Enter your Riot ID as GameName#Tag</string>
+    <string name="home_unpin_profile">Remove pinned profile</string>
+
+    <!-- Profile -->
+    <string name="profile_level_format">Level %d</string>
+    <string name="profile_solo_duo">Ranked Solo/Duo</string>
+    <string name="profile_flex">Ranked Flex</string>
+    <string name="profile_unranked">Unranked</string>
+    <string name="profile_record_format">%1$dW %2$dL · %3$d%% winrate</string>
+    <string name="profile_lp_format">%d LP</string>
+    <string name="profile_stat_winrate">Winrate</string>
+    <string name="profile_stat_kda">Avg KDA</string>
+    <string name="profile_stat_games">Games</string>
+    <string name="profile_view_match_history">Match History</string>
+    <string name="profile_view_champion_stats">Champion Stats</string>
+    <string name="profile_recent_games_label">Last %d games</string>
+
+    <!-- Errors -->
+    <string name="error_invalid_api_key_title">Configuration error</string>
+    <string name="error_invalid_api_key_message">This build isn\'t configured correctly. Please try again later.</string>
+    <string name="error_summoner_not_found_title">Summoner not found</string>
+    <string name="error_summoner_not_found_message">No account matches that Riot ID in this region. Check the spelling and the selected region.</string>
+    <string name="error_network_title">No connection</string>
+    <string name="error_network_message">Couldn\'t reach Riot\'s servers. Check your internet connection and try again.</string>
+    <string name="error_rate_limited_title">Rate limited</string>
+    <string name="error_rate_limited_message">Too many requests too fast. Wait a moment and try again.</string>
+    <string name="error_unknown_title">Something went wrong</string>
+    <string name="error_unknown_message">An unexpected error occurred. Try again.</string>
+    <string name="action_retry">Retry</string>
+
+    <!-- Match history -->
+    <string name="match_history_empty_title">No matches yet</string>
+    <string name="match_history_empty_message">Search a summoner from Home to load their match history.</string>
+    <string name="match_history_load_more">Load more</string>
+
+    <!-- Champion stats -->
+    <string name="champion_stats_empty_title">No champion data yet</string>
+    <string name="champion_stats_empty_message">Search a summoner from Home to see their champion stats.</string>
+    <string name="sort_by_mastery">Mastery</string>
+    <string name="sort_by_winrate">Winrate</string>
+    <string name="sort_by_games">Games</string>
+
+    <!-- Champion detail -->
+    <string name="champion_stat_hp">HP</string>
+    <string name="champion_stat_mp">MP</string>
+    <string name="champion_stat_armor">Armor</string>
+    <string name="champion_stat_mr">Magic Resist</string>
+    <string name="champion_stat_ad">Attack Damage</string>
+    <string name="champion_stat_as">Attack Speed</string>
+    <string name="champion_stat_ms">Move Speed</string>
+    <string name="champion_recommended_build_label">Recommended build, based on your recent games with this champion</string>
+    <string name="champion_no_recent_games">No recent games with this champion yet, so there\'s no build to suggest.</string>
+    <string name="champion_pro_build_header">Pro player build</string>
+    <string name="champion_pro_build_label">Pro player build, based on %d recent official matches</string>
+    <string name="champion_pro_build_unavailable">No recent professional matches found with this champion.</string>
+    <string name="champion_pro_build_failed">Couldn\'t load pro build data right now. Try again later.</string>
+
+    <!-- Settings -->
+    <string name="settings_region_label">Default region</string>
+    <string name="settings_clear_cache">Clear cached data</string>
+    <string name="settings_clear_cache_done">Cache cleared</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_saved">Settings saved</string>
+
+    <!-- Builds -->
+    <string name="builds_search_hint">Search a champion</string>
+    <string name="builds_empty_title">No champions found</string>
+    <string name="builds_empty_message">Try a different spelling.</string>
+</resources>

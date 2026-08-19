@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Local app-side additions only: things rift-tracker-design-system v1.1.0 genuinely
+         doesn't cover. Avatar/ItemSlot/MasteryBadge/AbilityBadge and the match-history-row,
+         champion-mastery-card, loading-skeleton and empty-state layouts now come straight from
+         the library (see design-system PR #1, merged). -->
+
+    <!-- No design-system equivalent: the library's Widget.RiftTracker.AbilityBadge is a text
+         badge for the ability key letter (P/Q/W/E/R), not an image frame, so it's applied to
+         abilityKey instead. This stays local as the frame around the loaded ability icon. -->
+    <style name="Widget.RiftLog.AbilityIconFrame" parent="">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@color/rift_surface_variant</item>
+        <item name="android:padding">6dp</item>
+    </style>
+</resources>
