@@ -1,4 +1,4 @@
-package com.example.riftlog.ui.profile
+﻿package com.example.riftlog.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +7,7 @@ import com.example.riftlog.data.repository.MatchRepository
 import com.example.riftlog.data.repository.ProfileRepository
 import com.example.riftlog.data.settings.SettingsRepository
 import com.example.riftlog.domain.ApiResult
+import com.example.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.example.riftlog.domain.model.MatchSummary
 import com.example.riftlog.domain.model.PlayerProfile
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 private const val RECENT_MATCH_COUNT = 20
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
-
 data class RecentFormAggregate(
     val gamesPlayed: Int,
     val wins: Int,
@@ -64,7 +63,7 @@ class ProfileViewModel(
                     val matchesResult = matchRepository.getRecentMatches(
                         profile.puuid, profile.platformRegion, count = RECENT_MATCH_COUNT
                     )
-                    val recentForm = (matchesResult as? ApiResult.Success)?.data?.let(::toAggregate)
+                    val recentForm = (matchesResult as? ApiResult.Success)?.data?.matches?.let(::toAggregate)
                     val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
                         ?: FALLBACK_DDRAGON_VERSION
                     _uiState.value = ProfileUiState.Success(profile, recentForm, version)

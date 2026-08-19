@@ -1,4 +1,4 @@
-package com.example.riftlog.ui.championdetail
+﻿package com.example.riftlog.ui.championdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,14 +7,13 @@ import com.example.riftlog.data.repository.MatchRepository
 import com.example.riftlog.data.repository.ProBuildRepository
 import com.example.riftlog.data.settings.SettingsRepository
 import com.example.riftlog.domain.ApiResult
+import com.example.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.example.riftlog.domain.model.ChampionDetail
 import com.example.riftlog.domain.model.ProBuild
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
 
 sealed class ChampionDetailUiState {
     object Loading : ChampionDetailUiState()

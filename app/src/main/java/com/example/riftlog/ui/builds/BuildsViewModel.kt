@@ -1,17 +1,16 @@
-package com.example.riftlog.ui.builds
+﻿package com.example.riftlog.ui.builds
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.riftlog.data.repository.ChampionRepository
 import com.example.riftlog.data.settings.SettingsRepository
 import com.example.riftlog.domain.ApiResult
+import com.example.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.example.riftlog.domain.model.ChampionInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
 
 sealed class BuildsUiState {
     object Loading : BuildsUiState()

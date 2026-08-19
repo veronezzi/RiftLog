@@ -1,4 +1,4 @@
-package com.example.riftlog.ui.championstats
+﻿package com.example.riftlog.ui.championstats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,14 +6,13 @@ import com.example.riftlog.data.repository.ChampionRepository
 import com.example.riftlog.data.repository.MatchRepository
 import com.example.riftlog.data.settings.SettingsRepository
 import com.example.riftlog.domain.ApiResult
+import com.example.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.example.riftlog.domain.model.ChampionAggregate
 import com.example.riftlog.domain.model.ChampionInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
 
 enum class ChampionSort { MASTERY, WINRATE, GAMES }
 

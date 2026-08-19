@@ -21,12 +21,16 @@ import com.example.riftlog.databinding.ItemStatRowBinding
 import com.example.riftlog.domain.model.AbilityInfo
 import com.example.riftlog.domain.model.ChampionDetail
 import com.example.riftlog.domain.model.ProBuild
+import com.example.riftlog.ui.common.bindError
+import com.rifttracker.designsystem.databinding.ViewEmptyStateBinding
 import kotlinx.coroutines.launch
 
 class ChampionDetailFragment : Fragment(R.layout.fragment_champion_detail) {
 
     private var _binding: FragmentChampionDetailBinding? = null
     private val binding get() = _binding!!
+    private var _emptyStateBinding: ViewEmptyStateBinding? = null
+    private val emptyStateBinding get() = _emptyStateBinding!!
 
     private val viewModel: ChampionDetailViewModel by viewModels {
         viewModelFactory {
@@ -45,6 +49,8 @@ class ChampionDetailFragment : Fragment(R.layout.fragment_champion_detail) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentChampionDetailBinding.bind(view)
+        _emptyStateBinding = ViewEmptyStateBinding.bind(binding.emptyState)
+        emptyStateBinding.emptyStateRetryButton.setOnClickListener { viewModel.retry() }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state -> render(state) }
@@ -55,7 +61,11 @@ class ChampionDetailFragment : Fragment(R.layout.fragment_champion_detail) {
     private fun render(state: ChampionDetailUiState) {
         binding.loadingIndicator.visibility = if (state is ChampionDetailUiState.Loading) View.VISIBLE else View.GONE
         binding.contentScroll.visibility = if (state is ChampionDetailUiState.Success) View.VISIBLE else View.GONE
+        binding.emptyState.visibility = if (state is ChampionDetailUiState.Error) View.VISIBLE else View.GONE
         if (state is ChampionDetailUiState.Success) bindDetail(state)
+        if (state is ChampionDetailUiState.Error) {
+            emptyStateBinding.bindError(error = state.error, onRetry = { viewModel.retry() })
+        }
     }
 
     private fun bindDetail(state: ChampionDetailUiState.Success) {
@@ -171,6 +181,7 @@ class ChampionDetailFragment : Fragment(R.layout.fragment_champion_detail) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        _emptyStateBinding = null
         _binding = null
     }
 }

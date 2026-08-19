@@ -1,4 +1,4 @@
-package com.example.riftlog.ui.matchhistory
+﻿package com.example.riftlog.ui.matchhistory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,7 @@ import com.example.riftlog.data.repository.ChampionRepository
 import com.example.riftlog.data.repository.MatchRepository
 import com.example.riftlog.data.settings.SettingsRepository
 import com.example.riftlog.domain.ApiResult
+import com.example.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.example.riftlog.domain.model.MatchSummary
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,8 +14,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 private const val PAGE_SIZE = 20
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
-
 sealed class MatchHistoryUiState {
     object Loading : MatchHistoryUiState()
     object NoProfile : MatchHistoryUiState()
@@ -83,12 +82,12 @@ class MatchHistoryViewModel(
             when (val result = matchRepository.getRecentMatches(puuid, platformRegion, requestedCount, forceRefresh)) {
                 is ApiResult.Error -> _uiState.value = MatchHistoryUiState.Error(result)
                 is ApiResult.Success -> {
-                    val matches = result.data
+                    val page = result.data
                     _uiState.value = MatchHistoryUiState.Success(
-                        matches = matches,
+                        matches = page.matches,
                         ddragonVersion = version,
                         isLoadingMore = false,
-                        canLoadMore = matches.size >= requestedCount,
+                        canLoadMore = page.hasMore,
                     )
                 }
             }

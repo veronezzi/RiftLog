@@ -12,6 +12,11 @@ import com.example.riftlog.domain.model.MatchSummary
 
 private const val LIVE_DATA_TTL_MILLIS = 5 * 60 * 1000L
 
+/** A page of match summaries. [hasMore] reflects whether Riot's match-id list itself was full
+ * (i.e. `count` ids came back from the API), not just whether the cached/filtered result happens
+ * to be full - so pagination stays accurate even when the player has exactly `count` total games. */
+data class MatchPage(val matches: List<MatchSummary>, val hasMore: Boolean)
+
 /** Fetches match ids + details and computes per-champion aggregates from the cached window. */
 class MatchRepository(
     private val apiClient: RiotApiClient,
@@ -23,13 +28,13 @@ class MatchRepository(
         platformRegion: String,
         count: Int = 20,
         forceRefresh: Boolean = false,
-    ): ApiResult<List<MatchSummary>> {
+    ): ApiResult<MatchPage> {
         if (!forceRefresh) {
             val cached = matchDao.getMatchesForPuuid(puuid)
             val freshEnough = cached.isNotEmpty() &&
                 System.currentTimeMillis() - cached.first().fetchedAt < LIVE_DATA_TTL_MILLIS
             if (freshEnough) {
-                return ApiResult.Success(cached.take(count).map { it.toDomain() })
+                return ApiResult.Success(MatchPage(cached.take(count).map { it.toDomain() }, hasMore = cached.size >= count))
             }
         }
 
@@ -41,6 +46,7 @@ class MatchRepository(
             is ApiResult.Success -> idsResult.data
             is ApiResult.Error -> return idsResult
         }
+        val hasMore = matchIds.size >= count
 
         val alreadyCached = matchDao.getCachedMatchIds(puuid).toSet()
         val idsToFetch = matchIds.filterNot { it in alreadyCached }
@@ -51,7 +57,12 @@ class MatchRepository(
             val matchResult = safeApiCall { regionalApi.getMatchDetail(matchId) }
             val match = when (matchResult) {
                 is ApiResult.Success -> matchResult.data
-                is ApiResult.Error -> return matchResult
+                is ApiResult.Error -> {
+                    // Persist whatever we already fetched before propagating the error, so a
+                    // transient failure partway through doesn't discard earlier successful fetches.
+                    if (newEntities.isNotEmpty()) matchDao.upsertMatches(newEntities)
+                    return matchResult
+                }
             }
             val participant = match.info.participants.firstOrNull { it.puuid == puuid } ?: continue
             newEntities += participant.toEntity(matchId, puuid, match.info.gameDuration, match.info.gameCreation, now)
@@ -61,7 +72,7 @@ class MatchRepository(
         }
 
         val allMatches = matchDao.getMatchesForPuuid(puuid)
-        return ApiResult.Success(allMatches.take(count).map { it.toDomain() })
+        return ApiResult.Success(MatchPage(allMatches.take(count).map { it.toDomain() }, hasMore))
     }
 
     suspend fun getChampionAggregate(puuid: String, championName: String): ChampionAggregate? {
