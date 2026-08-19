@@ -93,6 +93,7 @@ class HomeViewModel(
         currentQuery = ""
         _uiState.value = _uiState.value.copy(suggestions = emptyList())
         viewModelScope.launch {
+            settingsRepository.setLastSearch(suggestion.gameName, suggestion.tagLine, suggestion.platformRegion)
             events.send(
                 HomeEvent.NavigateToProfile(suggestion.gameName, suggestion.tagLine, suggestion.platformRegion)
             )
@@ -136,7 +137,7 @@ class HomeViewModel(
     }
 
     fun onUnpinClicked() {
-        viewModelScope.launch { settingsRepository.clearCachedData() }
+        viewModelScope.launch { settingsRepository.clearPinnedProfile() }
     }
 
     private fun loadPinnedPreview(recent: RecentSearch?) {

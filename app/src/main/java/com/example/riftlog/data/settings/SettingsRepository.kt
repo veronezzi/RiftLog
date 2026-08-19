@@ -105,14 +105,20 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
-    suspend fun clearCachedData() {
+    /** Just drops the Home pinned card. Deliberately keeps SEARCH_HISTORY: unpinning is "I don't
+     * want this card right now", not "forget everyone I've looked up". */
+    suspend fun clearPinnedProfile() {
         context.dataStore.edit {
             it.remove(Keys.LAST_GAME_NAME)
             it.remove(Keys.LAST_TAG_LINE)
             it.remove(Keys.LAST_PROFILE_PUUID)
             it.remove(Keys.LAST_PROFILE_REGION)
-            it.remove(Keys.SEARCH_HISTORY)
         }
+    }
+
+    suspend fun clearCachedData() {
+        clearPinnedProfile()
+        context.dataStore.edit { it.remove(Keys.SEARCH_HISTORY) }
     }
 
     companion object {
