@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.veronezzi.riftlog.R
 import com.veronezzi.riftlog.RiftLogApplication
+import com.veronezzi.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.veronezzi.riftlog.databinding.FragmentMatchHistoryBinding
 import com.veronezzi.riftlog.ui.common.bindError
 import com.veronezzi.riftlog.ui.common.setSkeletonVisible
@@ -38,7 +39,7 @@ class MatchHistoryFragment : Fragment(R.layout.fragment_match_history) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentMatchHistoryBinding.bind(view)
         _emptyStateBinding = ViewEmptyStateBinding.bind(binding.emptyState)
-        val matchAdapter = MatchAdapter(ddragonVersion = "14.1.1")
+        val matchAdapter = MatchAdapter(ddragonVersion = FALLBACK_DDRAGON_VERSION)
         adapter = matchAdapter
         binding.matchList.layoutManager = LinearLayoutManager(requireContext())
         binding.matchList.adapter = matchAdapter

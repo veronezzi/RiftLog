@@ -102,7 +102,7 @@ class MatchAdapter(private var ddragonVersion: String) : ListAdapter<MatchSummar
 
             binding.detailRow.visibility = if (expanded) View.VISIBLE else View.GONE
             binding.detailCs.text = "${match.totalMinionsKilled} CS"
-            binding.detailGold.text = "%.1fk gold".format(match.goldEarned / 1000.0)
+            binding.detailGold.text = context.getString(R.string.match_gold_format, match.goldEarned / 1000.0)
             val minutes = match.gameDurationSeconds / 60
             val seconds = match.gameDurationSeconds % 60
             binding.detailDuration.text = "${minutes}m ${seconds}s"

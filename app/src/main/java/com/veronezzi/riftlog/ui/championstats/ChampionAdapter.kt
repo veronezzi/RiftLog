@@ -41,16 +41,21 @@ class ChampionAdapter(private val onClick: (ChampionStatsItem) -> Unit) :
             }
             card.masteryChampionName.text = item.info.name
             val mastery = item.info.mastery
+            val context = binding.root.context
             card.masteryLevelBadge.text = "M${mastery?.championLevel ?: 0}"
-            card.masteryPoints.text = "%,d mastery points".format(mastery?.championPoints ?: 0L)
+            card.masteryPoints.text = context.getString(
+                R.string.champion_mastery_points_format, mastery?.championPoints ?: 0L
+            )
 
             val aggregate = item.aggregate
             binding.aggregateSummary.text = if (aggregate == null) {
-                "No recent games"
+                context.getString(R.string.champion_mastery_no_recent_games)
             } else {
                 val winRatePercent = (aggregate.winRate * 100).toInt()
                 val kda = "%.2f".format(aggregate.avgKda)
-                "${aggregate.gamesPlayed} games · $winRatePercent% winrate · $kda KDA"
+                context.getString(
+                    R.string.champion_mastery_summary_format, aggregate.gamesPlayed, winRatePercent, kda
+                )
             }
         }
     }

@@ -7,14 +7,13 @@ import com.veronezzi.riftlog.data.repository.MatchRepository
 import com.veronezzi.riftlog.data.repository.ProBuildRepository
 import com.veronezzi.riftlog.data.settings.SettingsRepository
 import com.veronezzi.riftlog.domain.ApiResult
+import com.veronezzi.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.veronezzi.riftlog.domain.model.ChampionDetail
 import com.veronezzi.riftlog.domain.model.ProBuild
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
 
 sealed class ChampionDetailUiState {
     object Loading : ChampionDetailUiState()

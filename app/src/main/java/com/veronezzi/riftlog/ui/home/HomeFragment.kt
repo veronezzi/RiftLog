@@ -1,6 +1,8 @@
 package com.veronezzi.riftlog.ui.home
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -61,6 +63,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         binding.pinnedProfileCard.setOnClickListener { viewModel.onPinnedProfileTapped() }
         binding.unpinButton.setOnClickListener { viewModel.onUnpinClicked() }
+        binding.riotIdInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                viewModel.onQueryChanged(s?.toString().orEmpty())
+            }
+            override fun afterTextChanged(s: Editable?) = Unit
+        })
     }
 
     private fun observeState() {
@@ -76,8 +85,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         binding.errorText.text = getString(R.string.home_error_invalid_riot_id)
                     }
                     renderPinned(state.pinned)
+                    renderSuggestions(state.suggestions)
                 }
             }
+        }
+    }
+
+    private fun renderSuggestions(suggestions: List<com.veronezzi.riftlog.data.settings.RecentSearch>) {
+        binding.suggestionsContainer.removeAllViews()
+        binding.suggestionsCard.visibility = if (suggestions.isEmpty()) View.GONE else View.VISIBLE
+        val paddingPx = resources.getDimensionPixelSize(com.rifttracker.designsystem.R.dimen.spacing_md)
+        suggestions.forEach { suggestion ->
+            val row = android.widget.TextView(requireContext()).apply {
+                text = "${suggestion.gameName}#${suggestion.tagLine} (${RegionDisplay.labelFor(suggestion.platformRegion)})"
+                setTextAppearance(com.rifttracker.designsystem.R.style.TextAppearance_RiftTracker_Body)
+                setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
+                isClickable = true
+                isFocusable = true
+                val outValue = android.util.TypedValue()
+                requireContext().theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+                setBackgroundResource(outValue.resourceId)
+                setOnClickListener { viewModel.onSuggestionTapped(suggestion) }
+            }
+            binding.suggestionsContainer.addView(row)
         }
     }
 

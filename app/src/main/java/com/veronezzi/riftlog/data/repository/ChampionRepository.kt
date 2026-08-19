@@ -30,11 +30,13 @@ class ChampionRepository(
 
     suspend fun getLatestVersion(): ApiResult<String> = safeApiCall {
         val cached = staticDataDao.get(KEY_VERSION)
+        if (cached != null && System.currentTimeMillis() - cached.fetchedAt < VERSION_TTL_MILLIS) {
+            return@safeApiCall cached.version
+        }
+
         val versions = dDragonApi.getVersions()
         val latest = versions.first()
-        if (cached?.version != latest) {
-            staticDataDao.upsert(StaticDataCacheEntity(KEY_VERSION, latest, latest, System.currentTimeMillis()))
-        }
+        staticDataDao.upsert(StaticDataCacheEntity(KEY_VERSION, latest, latest, System.currentTimeMillis()))
         latest
     }
 
@@ -141,5 +143,6 @@ class ChampionRepository(
 
     private companion object {
         const val KEY_VERSION = "ddragon_latest_version"
+        const val VERSION_TTL_MILLIS = 6 * 60 * 60 * 1000L // 6h - the patch version itself only changes ~biweekly
     }
 }
