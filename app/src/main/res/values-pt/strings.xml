@@ -57,7 +57,7 @@
     <string name="champion_stats_empty_title">Nenhum dado de campeão ainda</string>
     <string name="champion_stats_empty_message">Busque um invocador na tela inicial para ver as estatísticas de campeões.</string>
     <string name="sort_by_mastery">Maestria</string>
-    <string name="sort_by_winrate">Vitórias</string>
+    <string name="sort_by_winrate">Taxa de vitórias</string>
     <string name="sort_by_games">Partidas</string>
     <string name="champion_mastery_points_format">%,d pontos de maestria</string>
     <string name="champion_mastery_no_recent_games">Nenhuma partida recente</string>
