@@ -63,6 +63,7 @@ class ProfileViewModel(
                 is ApiResult.Success -> {
                     val profile = result.data
                     settingsRepository.setLastProfile(profile.puuid, profile.platformRegion)
+                    settingsRepository.addToSearchHistory(profile.gameName, profile.tagLine, profile.platformRegion)
                     val matchesResult = matchRepository.getRecentMatches(
                         profile.puuid, profile.platformRegion, count = RECENT_MATCH_COUNT, forceRefresh = forceRefresh
                     )

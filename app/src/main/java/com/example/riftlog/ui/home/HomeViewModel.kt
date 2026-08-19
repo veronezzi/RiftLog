@@ -24,11 +24,14 @@ sealed class PinnedProfileState {
     data class Error(val recentSearch: RecentSearch) : PinnedProfileState()
 }
 
+private const val MAX_SUGGESTIONS = 5
+
 data class HomeUiState(
     val selectedRegion: String = SettingsRepository.DEFAULT_PLATFORM_REGION,
     val recentSearch: RecentSearch? = null,
     val pinned: PinnedProfileState = PinnedProfileState.None,
     val inputError: String? = null,
+    val suggestions: List<RecentSearch> = emptyList(),
 )
 
 sealed class HomeEvent {
@@ -51,6 +54,12 @@ class HomeViewModel(
     private val events = Channel<HomeEvent>(Channel.BUFFERED)
     val eventFlow: Flow<HomeEvent> = events.receiveAsFlow()
 
+    /** Every Riot ID successfully resolved on this device before - there's no Riot API to search
+     * the whole player base by partial name, so "type a name, see options" can only ever suggest
+     * from what this app has already looked up locally, not discover new people. */
+    private var searchHistory: List<RecentSearch> = emptyList()
+    private var currentQuery: String = ""
+
     init {
         viewModelScope.launch {
             settingsRepository.platformRegion.collectLatest { region ->
@@ -63,6 +72,39 @@ class HomeViewModel(
                 loadPinnedPreview(recent)
             }
         }
+        viewModelScope.launch {
+            settingsRepository.searchHistory.collectLatest { history ->
+                searchHistory = history
+                _uiState.value = _uiState.value.copy(suggestions = filteredSuggestions())
+            }
+        }
+    }
+
+    /** Called on every keystroke in the Riot ID field (not just on submit) so suggestions update
+     * live. A "#" in the query means the user is already typing the tag, at which point matching
+     * by name prefix stops being useful - suggestions clear rather than showing stale matches. */
+    fun onQueryChanged(query: String) {
+        currentQuery = query
+        _uiState.value = _uiState.value.copy(suggestions = filteredSuggestions())
+    }
+
+    fun onSuggestionTapped(suggestion: RecentSearch) {
+        currentQuery = ""
+        _uiState.value = _uiState.value.copy(suggestions = emptyList())
+        viewModelScope.launch {
+            settingsRepository.setLastSearch(suggestion.gameName, suggestion.tagLine, suggestion.platformRegion)
+            events.send(
+                HomeEvent.NavigateToProfile(suggestion.gameName, suggestion.tagLine, suggestion.platformRegion)
+            )
+        }
+    }
+
+    private fun filteredSuggestions(): List<RecentSearch> {
+        val query = currentQuery.trim()
+        if (query.isBlank() || query.contains("#")) return emptyList()
+        return searchHistory
+            .filter { it.gameName.contains(query, ignoreCase = true) }
+            .take(MAX_SUGGESTIONS)
     }
 
     fun onRegionSelected(region: String) {
@@ -75,7 +117,8 @@ class HomeViewModel(
             _uiState.value = _uiState.value.copy(inputError = INVALID_FORMAT)
             return
         }
-        _uiState.value = _uiState.value.copy(inputError = null)
+        currentQuery = ""
+        _uiState.value = _uiState.value.copy(inputError = null, suggestions = emptyList())
         val gameName = parts[0].trim()
         val tagLine = parts[1].trim()
         val region = _uiState.value.selectedRegion
@@ -93,7 +136,7 @@ class HomeViewModel(
     }
 
     fun onUnpinClicked() {
-        viewModelScope.launch { settingsRepository.clearCachedData() }
+        viewModelScope.launch { settingsRepository.clearPinnedProfile() }
     }
 
     private fun loadPinnedPreview(recent: RecentSearch?) {
