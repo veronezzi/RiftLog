@@ -19,3 +19,17 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# kotlinx.serialization: keep the @Serializable DTOs and their generated $serializer
+# companions, otherwise R8 strips the classes the reflection-free serializer still looks
+# up by name at runtime, and Retrofit's JSON decoding throws in release builds.
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+
+-keep,includedescriptorclasses class com.veronezzi.riftlog.data.remote.**.dto.**$$serializer { *; }
+-keepclassmembers class com.veronezzi.riftlog.data.remote.**.dto.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.veronezzi.riftlog.data.remote.**.dto.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}

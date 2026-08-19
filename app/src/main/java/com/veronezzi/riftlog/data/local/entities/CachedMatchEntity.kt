@@ -1,0 +1,27 @@
+package com.veronezzi.riftlog.data.local.entities
+
+/** One row per (matchId, ownerPuuid) - the tracked player's participant line for that match. */
+data class CachedMatchEntity(
+    val matchId: String,
+    val ownerPuuid: String,
+    val championName: String,
+    val kills: Int,
+    val deaths: Int,
+    val assists: Int,
+    val win: Boolean,
+    val item0: Int,
+    val item1: Int,
+    val item2: Int,
+    val item3: Int,
+    val item4: Int,
+    val item5: Int,
+    val item6: Int,
+    val summoner1Id: Int,
+    val summoner2Id: Int,
+    val teamPosition: String,
+    val totalMinionsKilled: Int,
+    val goldEarned: Int,
+    val gameDuration: Long,
+    val gameCreation: Long,
+    val fetchedAt: Long,
+)

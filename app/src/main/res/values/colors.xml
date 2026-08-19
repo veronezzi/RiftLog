@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- rift-tracker-design-system v1.1.0 only ships rank_silver/gold/platinum/emerald/diamond
+         (see RankTierColor.kt). These fill the remaining tiers locally, matched to the same
+         muted/pastel saturation-brightness family as the design system's existing rank colors,
+         so they don't clash with rank_silver etc. If the design system adds real rank_iron/
+         rank_bronze/rank_master/rank_grandmaster/rank_challenger colors upstream, switch to
+         those and delete these. -->
+    <color name="rank_iron">#FF6E6660</color>
+    <color name="rank_bronze">#FFC17A4E</color>
+    <color name="rank_master">#FFB58FE0</color>
+    <color name="rank_grandmaster">#FFE0708F</color>
+    <color name="rank_challenger">#FF7FD9E8</color>
+</resources>
