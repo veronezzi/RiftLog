@@ -7,6 +7,7 @@ import com.example.riftlog.data.repository.MatchRepository
 import com.example.riftlog.data.repository.ProfileRepository
 import com.example.riftlog.data.settings.SettingsRepository
 import com.example.riftlog.domain.ApiResult
+import com.example.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.example.riftlog.domain.model.MatchSummary
 import com.example.riftlog.domain.model.PlayerProfile
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 private const val RECENT_MATCH_COUNT = 20
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
-
 data class RecentFormAggregate(
     val gamesPlayed: Int,
     val wins: Int,
@@ -48,23 +47,26 @@ class ProfileViewModel(
     val uiState: StateFlow<ProfileUiState> = _uiState
 
     init {
-        load()
+        load(forceRefresh = false)
     }
 
-    fun retry() = load()
+    // Bypasses the cache: otherwise a retry right after a mid-fetch match-list failure can land
+    // on the partial page that failure already persisted (still TTL-fresh) instead of actually
+    // hitting the network again. See MatchHistoryViewModel.retry() for the same fix.
+    fun retry() = load(forceRefresh = true)
 
-    private fun load() {
+    private fun load(forceRefresh: Boolean) {
         _uiState.value = ProfileUiState.Loading
         viewModelScope.launch {
-            when (val result = profileRepository.getProfile(gameName, tagLine, platformRegion)) {
+            when (val result = profileRepository.getProfile(gameName, tagLine, platformRegion, forceRefresh)) {
                 is ApiResult.Error -> _uiState.value = ProfileUiState.Error(result)
                 is ApiResult.Success -> {
                     val profile = result.data
                     settingsRepository.setLastProfile(profile.puuid, profile.platformRegion)
                     val matchesResult = matchRepository.getRecentMatches(
-                        profile.puuid, profile.platformRegion, count = RECENT_MATCH_COUNT
+                        profile.puuid, profile.platformRegion, count = RECENT_MATCH_COUNT, forceRefresh = forceRefresh
                     )
-                    val recentForm = (matchesResult as? ApiResult.Success)?.data?.let(::toAggregate)
+                    val recentForm = (matchesResult as? ApiResult.Success)?.data?.matches?.let(::toAggregate)
                     val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
                         ?: FALLBACK_DDRAGON_VERSION
                     _uiState.value = ProfileUiState.Success(profile, recentForm, version)

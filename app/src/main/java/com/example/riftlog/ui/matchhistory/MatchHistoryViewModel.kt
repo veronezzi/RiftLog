@@ -6,6 +6,7 @@ import com.example.riftlog.data.repository.ChampionRepository
 import com.example.riftlog.data.repository.MatchRepository
 import com.example.riftlog.data.settings.SettingsRepository
 import com.example.riftlog.domain.ApiResult
+import com.example.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.example.riftlog.domain.model.MatchSummary
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,8 +14,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 private const val PAGE_SIZE = 20
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
-
 sealed class MatchHistoryUiState {
     object Loading : MatchHistoryUiState()
     object NoProfile : MatchHistoryUiState()
@@ -41,10 +40,14 @@ class MatchHistoryViewModel(
     private var requestedCount = PAGE_SIZE
 
     init {
-        load()
+        load(forceRefresh = false)
     }
 
-    fun retry() = load()
+    // Always bypasses the cache: a retry after an error can otherwise land on a TTL-fresh but
+    // partial page (a mid-fetch failure persists whatever it got before propagating the error),
+    // silently "succeeding" with an incomplete match list for up to 5 minutes instead of
+    // actually trying the network again.
+    fun retry() = load(forceRefresh = true)
 
     fun loadMore() {
         val state = _uiState.value
@@ -53,7 +56,7 @@ class MatchHistoryViewModel(
         fetchMatches(forceRefresh = true, isLoadingMore = true)
     }
 
-    private fun load() {
+    private fun load(forceRefresh: Boolean) {
         _uiState.value = MatchHistoryUiState.Loading
         requestedCount = PAGE_SIZE
         viewModelScope.launch {
@@ -64,7 +67,7 @@ class MatchHistoryViewModel(
             }
             puuid = lastProfile.puuid
             platformRegion = lastProfile.platformRegion
-            fetchMatches(forceRefresh = false, isLoadingMore = false)
+            fetchMatches(forceRefresh = forceRefresh, isLoadingMore = false)
         }
     }
 
@@ -83,12 +86,12 @@ class MatchHistoryViewModel(
             when (val result = matchRepository.getRecentMatches(puuid, platformRegion, requestedCount, forceRefresh)) {
                 is ApiResult.Error -> _uiState.value = MatchHistoryUiState.Error(result)
                 is ApiResult.Success -> {
-                    val matches = result.data
+                    val page = result.data
                     _uiState.value = MatchHistoryUiState.Success(
-                        matches = matches,
+                        matches = page.matches,
                         ddragonVersion = version,
                         isLoadingMore = false,
-                        canLoadMore = matches.size >= requestedCount,
+                        canLoadMore = page.hasMore,
                     )
                 }
             }

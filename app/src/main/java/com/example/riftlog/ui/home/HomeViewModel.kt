@@ -7,6 +7,7 @@ import com.example.riftlog.data.repository.ProfileRepository
 import com.example.riftlog.data.settings.RecentSearch
 import com.example.riftlog.data.settings.SettingsRepository
 import com.example.riftlog.domain.ApiResult
+import com.example.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.example.riftlog.domain.model.PlayerProfile
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -15,8 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-
-private const val FALLBACK_DDRAGON_VERSION = "14.1.1"
 
 sealed class PinnedProfileState {
     object None : PinnedProfileState()

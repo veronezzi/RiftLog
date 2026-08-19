@@ -1,5 +1,9 @@
 package com.example.riftlog.data.remote.ddragon
 
+/** Used when the live `/api/versions.json` fetch fails and there's no cached version either.
+ * Only a fallback - exact correctness doesn't matter, just keep it roughly current. */
+const val FALLBACK_DDRAGON_VERSION = "15.1.1"
+
 /** Builds Data Dragon CDN image URLs. All static, no API key needed. */
 object DDragonUrls {
     private const val CDN_BASE = "https://ddragon.leagueoflegends.com"
