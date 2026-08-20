@@ -74,6 +74,8 @@
     <string name="champion_stat_ms">Move Speed</string>
     <string name="champion_recommended_build_label">Recommended build, based on your recent games with this champion</string>
     <string name="champion_no_recent_games">No recent games with this champion yet, so there\'s no build to suggest.</string>
+    <string name="champion_recommended_runes_label">Recommended runes, based on your recent games with this champion</string>
+    <string name="champion_no_recent_runes">No recent games with this champion yet, so there\'s no rune page to suggest.</string>
     <string name="champion_pro_build_header">Pro player build</string>
     <string name="champion_pro_build_label">Pro player build, based on %d recent official matches</string>
     <string name="champion_pro_build_unavailable">No recent professional matches found with this champion.</string>

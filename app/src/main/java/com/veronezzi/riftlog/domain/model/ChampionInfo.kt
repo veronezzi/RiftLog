@@ -47,3 +47,25 @@ data class ProBuild(
     val items: List<ItemInfo>,
     val sampleGames: Int,
 )
+
+/** A single rune or rune-tree icon + display name, resolved from runesReforged.json. */
+data class RuneIconInfo(
+    val id: Int,
+    val name: String,
+    val iconUrl: String,
+)
+
+/** Flattened lookup over every rune tree/keystone/minor rune, keyed by id, for turning the
+ * (styleId, keystoneId) ints stored per match into displayable icons. */
+data class RuneCatalog(
+    val stylesById: Map<Int, RuneIconInfo>,
+    val runesById: Map<Int, RuneIconInfo>,
+)
+
+/** The recommended rune page for a champion, resolved against [RuneCatalog]. Null when a rune id
+ * from the aggregate has no match in the catalog (e.g. stale cached version). */
+data class RunePageInfo(
+    val primaryStyle: RuneIconInfo,
+    val subStyle: RuneIconInfo,
+    val keystone: RuneIconInfo,
+)

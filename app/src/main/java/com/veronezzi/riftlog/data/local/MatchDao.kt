@@ -69,6 +69,9 @@ class MatchDao(private val dbHelper: RiftLogDbHelper) {
                 item4 = getInt(getColumnIndexOrThrow("item4")),
                 item5 = getInt(getColumnIndexOrThrow("item5")),
                 item6 = getInt(getColumnIndexOrThrow("item6")),
+                primaryStyleId = getInt(getColumnIndexOrThrow("primaryStyleId")),
+                subStyleId = getInt(getColumnIndexOrThrow("subStyleId")),
+                keystoneId = getInt(getColumnIndexOrThrow("keystoneId")),
                 summoner1Id = getInt(getColumnIndexOrThrow("summoner1Id")),
                 summoner2Id = getInt(getColumnIndexOrThrow("summoner2Id")),
                 teamPosition = getString(getColumnIndexOrThrow("teamPosition")),
@@ -97,6 +100,9 @@ class MatchDao(private val dbHelper: RiftLogDbHelper) {
         put("item4", item4)
         put("item5", item5)
         put("item6", item6)
+        put("primaryStyleId", primaryStyleId)
+        put("subStyleId", subStyleId)
+        put("keystoneId", keystoneId)
         put("summoner1Id", summoner1Id)
         put("summoner2Id", summoner2Id)
         put("teamPosition", teamPosition)

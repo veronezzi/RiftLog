@@ -19,4 +19,9 @@ object DDragonUrls {
 
     fun itemIcon(version: String, itemId: Int): String =
         "$CDN_BASE/cdn/$version/img/item/$itemId.png"
+
+    /** Rune icons aren't versioned under /cdn/{version}/ like other assets - runesReforged.json's
+     * `icon` field is already a full relative path (e.g. "perk-images/Styles/Precision/..."),
+     * served straight off /cdn/img/. */
+    fun runeIcon(iconPath: String): String = "$CDN_BASE/cdn/img/$iconPath"
 }

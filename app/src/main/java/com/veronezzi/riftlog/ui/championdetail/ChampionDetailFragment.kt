@@ -21,6 +21,8 @@ import com.veronezzi.riftlog.databinding.ItemStatRowBinding
 import com.veronezzi.riftlog.domain.model.AbilityInfo
 import com.veronezzi.riftlog.domain.model.ChampionDetail
 import com.veronezzi.riftlog.domain.model.ProBuild
+import com.veronezzi.riftlog.domain.model.RuneIconInfo
+import com.veronezzi.riftlog.domain.model.RunePageInfo
 import com.veronezzi.riftlog.ui.common.bindError
 import com.rifttracker.designsystem.databinding.ViewEmptyStateBinding
 import kotlinx.coroutines.launch
@@ -77,6 +79,7 @@ class ChampionDetailFragment : Fragment(R.layout.fragment_champion_detail) {
         bindStats(detail)
         bindAbilities(detail)
         bindBuild(state.recommendedBuild, state.ddragonVersion)
+        bindRunes(state.recommendedRunes)
         bindProBuild(state.proBuild, state.proBuildFailed)
     }
 
@@ -147,6 +150,32 @@ class ChampionDetailFragment : Fragment(R.layout.fragment_champion_detail) {
             }
             binding.buildItemRow.addView(icon)
         }
+    }
+
+    private fun bindRunes(runes: RunePageInfo?) {
+        binding.runeRow.removeAllViews()
+        binding.noRunesText.visibility = if (runes == null) View.VISIBLE else View.GONE
+        binding.runeRow.visibility = if (runes == null) View.GONE else View.VISIBLE
+        if (runes == null) return
+        // Keystone first and larger since it's the pick that most defines the page; the two tree
+        // badges after it are secondary context.
+        addRuneIcon(runes.keystone, sizeDp = 40)
+        addRuneIcon(runes.primaryStyle, sizeDp = 28)
+        addRuneIcon(runes.subStyle, sizeDp = 28)
+    }
+
+    private fun addRuneIcon(rune: RuneIconInfo, sizeDp: Int) {
+        val icon = android.widget.ImageView(requireContext()).apply {
+            layoutParams = android.widget.LinearLayout.LayoutParams(sizeDp.dpToPx(), sizeDp.dpToPx()).apply {
+                setMargins(0, 0, 8.dpToPx(), 0)
+            }
+            contentDescription = rune.name
+            load(rune.iconUrl) {
+                placeholder(R.drawable.bg_skeleton_block)
+                error(R.drawable.bg_skeleton_block)
+            }
+        }
+        binding.runeRow.addView(icon)
     }
 
     private fun bindProBuild(proBuild: ProBuild?, proBuildFailed: Boolean) {

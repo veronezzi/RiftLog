@@ -74,6 +74,8 @@
     <string name="champion_stat_ms">Velocidade de Movimento</string>
     <string name="champion_recommended_build_label">Build recomendada, baseada nas suas partidas recentes com esse campeão</string>
     <string name="champion_no_recent_games">Ainda não há partidas recentes com esse campeão, então não há build para sugerir.</string>
+    <string name="champion_recommended_runes_label">Runas recomendadas, baseadas nas suas partidas recentes com esse campeão</string>
+    <string name="champion_no_recent_runes">Ainda não há partidas recentes com esse campeão, então não há runas para sugerir.</string>
     <string name="champion_pro_build_header">Build de jogador profissional</string>
     <string name="champion_pro_build_label">Build de jogador profissional, baseada em %d partidas oficiais recentes</string>
     <string name="champion_pro_build_unavailable">Nenhuma partida profissional recente encontrada com esse campeão.</string>

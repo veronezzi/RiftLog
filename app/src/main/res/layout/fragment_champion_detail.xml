@@ -106,6 +106,29 @@
                     android:visibility="gone" />
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xl"
+                    android:text="@string/champion_recommended_runes_label"
+                    android:textAppearance="@style/TextAppearance.RiftTracker.LabelUppercase" />
+
+                <LinearLayout
+                    android:id="@+id/runeRow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:orientation="horizontal" />
+
+                <TextView
+                    android:id="@+id/noRunesText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/champion_no_recent_runes"
+                    android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/proBuildLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

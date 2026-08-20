@@ -3,6 +3,7 @@ package com.veronezzi.riftlog.data.remote.ddragon
 import com.veronezzi.riftlog.data.remote.ddragon.dto.ChampionDetailListDto
 import com.veronezzi.riftlog.data.remote.ddragon.dto.ChampionListDto
 import com.veronezzi.riftlog.data.remote.ddragon.dto.ItemListDto
+import com.veronezzi.riftlog.data.remote.ddragon.dto.RuneTreeDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 
@@ -23,4 +24,7 @@ interface DDragonApi {
 
     @GET("cdn/{version}/data/en_US/item.json")
     suspend fun getItemList(@Path("version") version: String): ItemListDto
+
+    @GET("cdn/{version}/data/en_US/runesReforged.json")
+    suspend fun getRunesReforged(@Path("version") version: String): List<RuneTreeDto>
 }

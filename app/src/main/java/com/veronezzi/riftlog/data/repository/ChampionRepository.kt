@@ -10,6 +10,7 @@ import com.veronezzi.riftlog.data.remote.ddragon.DDragonUrls
 import com.veronezzi.riftlog.data.remote.ddragon.dto.ChampionDetailListDto
 import com.veronezzi.riftlog.data.remote.ddragon.dto.ChampionListDto
 import com.veronezzi.riftlog.data.remote.ddragon.dto.ItemListDto
+import com.veronezzi.riftlog.data.remote.ddragon.dto.RuneTreeDto
 import com.veronezzi.riftlog.data.remote.safeApiCall
 import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.domain.model.AbilityInfo
@@ -17,6 +18,9 @@ import com.veronezzi.riftlog.domain.model.ChampionDetail
 import com.veronezzi.riftlog.domain.model.ChampionInfo
 import com.veronezzi.riftlog.domain.model.ChampionMastery
 import com.veronezzi.riftlog.domain.model.ItemInfo
+import com.veronezzi.riftlog.domain.model.RuneCatalog
+import com.veronezzi.riftlog.domain.model.RuneIconInfo
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
 /** Data Dragon static data (patch-versioned, cached indefinitely) merged with champion mastery. */
@@ -129,6 +133,29 @@ class ChampionRepository(
             val itemId = idString.toIntOrNull() ?: return@mapNotNull null
             itemId to ItemInfo(itemId, item.name, DDragonUrls.itemIcon(version, itemId))
         }.toMap()
+    }
+
+    suspend fun getRunes(version: String): ApiResult<RuneCatalog> = safeApiCall {
+        val key = "runes_reforged_$version"
+        val cached = staticDataDao.get(key)
+        val serializer = ListSerializer(RuneTreeDto.serializer())
+        val trees = if (cached != null) {
+            json.decodeFromString(serializer, cached.json)
+        } else {
+            dDragonApi.getRunesReforged(version).also {
+                staticDataDao.upsert(
+                    StaticDataCacheEntity(key, version, json.encodeToString(serializer, it), System.currentTimeMillis())
+                )
+            }
+        }
+
+        val stylesById = trees.associate { tree ->
+            tree.id to RuneIconInfo(tree.id, tree.name, DDragonUrls.runeIcon(tree.icon))
+        }
+        val runesById = trees.flatMap { it.slots }.flatMap { it.runes }.associate { rune ->
+            rune.id to RuneIconInfo(rune.id, rune.name, DDragonUrls.runeIcon(rune.icon))
+        }
+        RuneCatalog(stylesById, runesById)
     }
 
     suspend fun refreshChampionMasteries(puuid: String, platformRegion: String): ApiResult<Unit> = safeApiCall {
