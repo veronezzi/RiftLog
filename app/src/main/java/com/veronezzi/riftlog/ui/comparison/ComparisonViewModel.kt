@@ -161,11 +161,14 @@ class ComparisonViewModel(
         return ComparisonSlotState.Success(profile, recentForm)
     }
 
+    // Player B is always looked up on Player A's region (see the class doc), so a suggestion from
+    // a different region would 404 with no explanation if it were tappable - filter those out
+    // rather than let the user hit a dead end.
     private fun filteredSuggestions(): List<RecentSearch> {
         val query = playerBQuery.trim()
         if (query.isBlank() || query.contains("#")) return emptyList()
         return searchHistory
-            .filter { it.gameName.contains(query, ignoreCase = true) }
+            .filter { it.platformRegion == playerAPlatformRegion && it.gameName.contains(query, ignoreCase = true) }
             .take(MAX_SUGGESTIONS)
     }
 

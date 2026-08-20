@@ -80,7 +80,10 @@ class ComparisonFragment : Fragment(R.layout.fragment_comparison) {
     }
 
     private fun render(state: ComparisonUiState) {
-        binding.playerBSearchSection.visibility = if (state.playerB is ComparisonSlotState.Empty) View.VISIBLE else View.GONE
+        // Visible whenever B isn't loaded/loaded-ok, not just on Empty - otherwise an Error state
+        // hides the search box with no way back to it except Retry on the exact same failing id.
+        binding.playerBSearchSection.visibility =
+            if (state.playerB is ComparisonSlotState.Success || state.playerB is ComparisonSlotState.Loading) View.GONE else View.VISIBLE
         binding.playerBInputErrorText.visibility = if (state.playerBInputError) View.VISIBLE else View.GONE
         renderSuggestions(state.playerBSuggestions)
 
@@ -186,8 +189,8 @@ class ComparisonFragment : Fragment(R.layout.fragment_comparison) {
 
         addStatRow(
             getString(R.string.profile_stat_winrate),
-            "${a.recentForm?.winRatePercent ?: 0}%",
-            "${b.recentForm?.winRatePercent ?: 0}%",
+            a.recentForm?.let { "${it.winRatePercent}%" } ?: "-",
+            b.recentForm?.let { "${it.winRatePercent}%" } ?: "-",
             compareRecentForm(a.recentForm, b.recentForm) { it.winRatePercent },
         )
 

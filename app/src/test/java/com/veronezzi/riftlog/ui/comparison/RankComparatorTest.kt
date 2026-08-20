@@ -46,4 +46,18 @@ class RankComparatorTest {
         val b = rank("PLATINUM", "I", 50)
         assertEquals(0, RankComparator.compare(a, b))
     }
+
+    @Test
+    fun `apex tiers with tied division compare by LP`() {
+        val masterLow = rank("MASTER", "I", 50)
+        val masterHigh = rank("MASTER", "I", 900)
+        assertTrue(RankComparator.compare(masterLow, masterHigh) < 0)
+    }
+
+    @Test
+    fun `unknown tier loses to every real rank instead of tying`() {
+        val unknown = rank("UNRANKED_GARBAGE", "IV", 0)
+        val iron = rank("IRON", "IV", 0)
+        assertTrue(RankComparator.compare(unknown, iron) < 0)
+    }
 }

@@ -3,8 +3,9 @@ package com.veronezzi.riftlog.ui.comparison
 import com.veronezzi.riftlog.domain.model.RankEntry
 
 /** Orders two rank entries by tier, then division, then LP - the same order Riot's own client
- * sorts by. Tiers/divisions absent from the lookup lists (unexpected API value) fall back to
- * index -1, which only ever ties against another unexpected value rather than crashing. */
+ * sorts by. A tier/division absent from the lookup lists (unexpected API value) falls back to
+ * index -1, i.e. it compares as below IRON/below division IV rather than crashing - it does not
+ * tie against other unexpected values. */
 object RankComparator {
     private val TIER_ORDER = listOf(
         "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND",
