@@ -81,9 +81,8 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
                 championId INTEGER NOT NULL,
                 championLevel INTEGER NOT NULL,
                 championPoints INTEGER NOT NULL,
-                championPointsSinceLastLevel INTEGER NOT NULL DEFAULT 0,
-                championPointsUntilNextLevel INTEGER NOT NULL DEFAULT 0,
-                tokensEarned INTEGER NOT NULL DEFAULT 0,
+                championPointsSinceLastLevel INTEGER,
+                championPointsUntilNextLevel INTEGER,
                 fetchedAt INTEGER NOT NULL,
                 PRIMARY KEY (puuid, championId)
             )
@@ -110,12 +109,11 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
             db.execSQL("ALTER TABLE cached_matches ADD COLUMN keystoneId INTEGER NOT NULL DEFAULT 0")
         }
         if (oldVersion < 3) {
-            // Mastery-progress columns; existing rows default to 0 until the next refresh
-            // re-fetches them from champion-mastery-v4 (same "stale until re-fetched" pattern
-            // as the rune columns above).
-            db.execSQL("ALTER TABLE cached_masteries ADD COLUMN championPointsSinceLastLevel INTEGER NOT NULL DEFAULT 0")
-            db.execSQL("ALTER TABLE cached_masteries ADD COLUMN championPointsUntilNextLevel INTEGER NOT NULL DEFAULT 0")
-            db.execSQL("ALTER TABLE cached_masteries ADD COLUMN tokensEarned INTEGER NOT NULL DEFAULT 0")
+            // Mastery-progress columns. Left nullable (no DEFAULT) on purpose: existing rows come
+            // back as SQL NULL, i.e. "progress unknown", until the next refresh re-fetches them -
+            // not a fake 0, which would be indistinguishable from a genuinely maxed-out champion.
+            db.execSQL("ALTER TABLE cached_masteries ADD COLUMN championPointsSinceLastLevel INTEGER")
+            db.execSQL("ALTER TABLE cached_masteries ADD COLUMN championPointsUntilNextLevel INTEGER")
         }
     }
 

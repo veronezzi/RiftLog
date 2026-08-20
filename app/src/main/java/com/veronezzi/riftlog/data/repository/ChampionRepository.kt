@@ -78,7 +78,6 @@ class ChampionRepository(
                         championPoints = it.championPoints,
                         championPointsSinceLastLevel = it.championPointsSinceLastLevel,
                         championPointsUntilNextLevel = it.championPointsUntilNextLevel,
-                        tokensEarned = it.tokensEarned,
                     )
                 },
             )
@@ -176,7 +175,6 @@ class ChampionRepository(
                     championPoints = it.championPoints,
                     championPointsSinceLastLevel = it.championPointsSinceLastLevel,
                     championPointsUntilNextLevel = it.championPointsUntilNextLevel,
-                    tokensEarned = it.tokensEarned,
                     fetchedAt = now,
                 )
             }

@@ -66,7 +66,8 @@ class ChampionAdapter(private val onClick: (ChampionStatsItem) -> Unit) :
         }
 
         private fun bindProgress(mastery: ChampionMastery?, context: Context) {
-            if (mastery == null) {
+            val fraction = mastery?.progressFraction
+            if (mastery == null || fraction == null) {
                 binding.masteryProgressBar.visibility = View.GONE
                 binding.masteryProgressLabel.visibility = View.GONE
                 return
@@ -74,17 +75,19 @@ class ChampionAdapter(private val onClick: (ChampionStatsItem) -> Unit) :
             binding.masteryProgressBar.visibility = View.VISIBLE
             binding.masteryProgressLabel.visibility = View.VISIBLE
 
-            val fraction = mastery.progressFraction
-            (binding.masteryProgressFill.layoutParams as LinearLayout.LayoutParams).weight = fraction
-            (binding.masteryProgressRemainder.layoutParams as LinearLayout.LayoutParams).weight = 1f - fraction
-            binding.masteryProgressBar.requestLayout()
+            binding.masteryProgressFill.layoutParams =
+                (binding.masteryProgressFill.layoutParams as LinearLayout.LayoutParams).apply { weight = fraction }
+            binding.masteryProgressRemainder.layoutParams =
+                (binding.masteryProgressRemainder.layoutParams as LinearLayout.LayoutParams).apply { weight = 1f - fraction }
 
             binding.masteryProgressLabel.text = if (mastery.isMaxLevel) {
                 context.getString(R.string.champion_mastery_max_level)
             } else {
+                // fraction != null guarantees championPointsUntilNextLevel is known here too -
+                // see ChampionMastery.progressFraction, which returns null unless both are set.
                 context.getString(
                     R.string.champion_mastery_progress_format,
-                    mastery.championPointsUntilNextLevel,
+                    mastery.championPointsUntilNextLevel ?: 0,
                     mastery.championLevel + 1,
                 )
             }
