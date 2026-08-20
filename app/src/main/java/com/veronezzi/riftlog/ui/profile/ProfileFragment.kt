@@ -2,6 +2,7 @@ package com.veronezzi.riftlog.ui.profile
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -56,6 +57,16 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
         binding.championStatsButton.setOnClickListener {
             findNavController().navigate(R.id.action_profile_to_championStats)
+        }
+        binding.compareButton.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_profile_to_comparison,
+                bundleOf(
+                    "gameName" to requireArguments().getString("gameName"),
+                    "tagLine" to requireArguments().getString("tagLine"),
+                    "platformRegion" to requireArguments().getString("platformRegion"),
+                )
+            )
         }
         emptyStateBinding.emptyStateRetryButton.setOnClickListener { viewModel.retry() }
 

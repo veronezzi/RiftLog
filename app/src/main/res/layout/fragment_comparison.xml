@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rift_bg">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_lg">
+
+            <LinearLayout
+                android:id="@+id/playerBSearchSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/comparison_player_b_label"
+                    android:textAppearance="@style/TextAppearance.RiftTracker.LabelUppercase" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/playerBInputLayout"
+                    style="@style/Widget.RiftTracker.TextInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:hint="@string/comparison_player_b_hint">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/playerBInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:imeOptions="actionSearch" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/playerBSuggestionsCard"
+                    style="@style/Widget.RiftTracker.CardView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_xs"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:id="@+id/playerBSuggestionsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/playerBInputErrorText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:gravity="center"
+                    android:text="@string/home_error_invalid_riot_id"
+                    android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+                    android:textColor="@color/rift_loss"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/playerBSearchButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    android:text="@string/home_search_button" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/headersRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xl"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:id="@+id/playerAFrame"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <FrameLayout
+                        android:id="@+id/playerASkeleton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <include layout="@layout/view_skeleton_row" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:id="@+id/playerAContent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/playerAAvatar"
+                            style="@style/Widget.RiftTracker.Avatar.Small"
+                            android:contentDescription="@null" />
+
+                        <TextView
+                            android:id="@+id/playerAName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:gravity="center"
+                            android:textAppearance="@style/TextAppearance.RiftTracker.Body"
+                            tools:text="Faker#KR1" />
+
+                        <TextView
+                            android:id="@+id/playerALevel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xxs"
+                            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+                            tools:text="Level 412" />
+                    </LinearLayout>
+
+                    <include
+                        android:id="@+id/playerAEmptyState"
+                        layout="@layout/view_empty_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/spacing_sm"
+                    android:text="@string/comparison_vs"
+                    android:textAppearance="@style/TextAppearance.RiftTracker.Title" />
+
+                <FrameLayout
+                    android:id="@+id/playerBFrame"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:id="@+id/playerBPlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/bg_skeleton_block" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:gravity="center"
+                            android:text="@string/comparison_player_b_placeholder"
+                            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/playerBSkeleton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone">
+                        <include layout="@layout/view_skeleton_row" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:id="@+id/playerBContent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/playerBAvatar"
+                            style="@style/Widget.RiftTracker.Avatar.Small"
+                            android:contentDescription="@null" />
+
+                        <TextView
+                            android:id="@+id/playerBName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:gravity="center"
+                            android:textAppearance="@style/TextAppearance.RiftTracker.Body"
+                            tools:text="Rival#EUW" />
+
+                        <TextView
+                            android:id="@+id/playerBLevel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xxs"
+                            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+                            tools:text="Level 201" />
+
+                        <TextView
+                            android:id="@+id/playerBChangeButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:background="?attr/selectableItemBackground"
+                            android:padding="@dimen/spacing_xxs"
+                            android:text="@string/comparison_change_player_b"
+                            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall" />
+                    </LinearLayout>
+
+                    <include
+                        android:id="@+id/playerBEmptyState"
+                        layout="@layout/view_empty_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/compareStatsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xl"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</FrameLayout>
