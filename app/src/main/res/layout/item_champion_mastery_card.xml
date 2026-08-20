@@ -23,4 +23,41 @@
         android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
         tools:text="12 games · 58% winrate · 4.2 KDA" />
 
+    <!-- Progress toward next mastery level, same weighted-fill-over-track mechanic as the design
+         system's Widget.RiftTracker.WinrateBar (bg_progress_track for the empty portion, a
+         weighted View on top for the filled portion) - reused here with the mastery accent
+         color instead of win/loss colors. -->
+    <LinearLayout
+        android:id="@+id/masteryProgressBar"
+        style="@style/Widget.RiftTracker.WinrateBar"
+        android:layout_width="match_parent"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginEnd="@dimen/spacing_md"
+        android:layout_marginTop="@dimen/spacing_xs">
+
+        <View
+            android:id="@+id/masteryProgressFill"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/rift_accent" />
+
+        <View
+            android:id="@+id/masteryProgressRemainder"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/masteryProgressLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_md"
+        android:layout_marginEnd="@dimen/spacing_md"
+        android:layout_marginTop="@dimen/spacing_xxs"
+        android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+        tools:text="1.240 points to M8" />
+
 </LinearLayout>

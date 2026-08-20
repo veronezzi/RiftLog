@@ -73,7 +73,12 @@ class ChampionRepository(
                 squareImageUrl = DDragonUrls.championSquare(version, summary.image.full),
                 splashImageUrl = DDragonUrls.championSplash(summary.id),
                 mastery = masteryByChampionId[championId]?.let {
-                    ChampionMastery(it.championLevel, it.championPoints)
+                    ChampionMastery(
+                        championLevel = it.championLevel,
+                        championPoints = it.championPoints,
+                        championPointsSinceLastLevel = it.championPointsSinceLastLevel,
+                        championPointsUntilNextLevel = it.championPointsUntilNextLevel,
+                    )
                 },
             )
         }
@@ -163,7 +168,15 @@ class ChampionRepository(
         val now = System.currentTimeMillis()
         masteryDao.upsertMasteries(
             masteries.map {
-                CachedMasteryEntity(puuid, it.championId, it.championLevel, it.championPoints, now)
+                CachedMasteryEntity(
+                    puuid = puuid,
+                    championId = it.championId,
+                    championLevel = it.championLevel,
+                    championPoints = it.championPoints,
+                    championPointsSinceLastLevel = it.championPointsSinceLastLevel,
+                    championPointsUntilNextLevel = it.championPointsUntilNextLevel,
+                    fetchedAt = now,
+                )
             }
         )
     }

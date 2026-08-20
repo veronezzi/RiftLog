@@ -13,7 +13,26 @@ data class ChampionInfo(
 data class ChampionMastery(
     val championLevel: Int,
     val championPoints: Long,
-)
+    // Null (not 0) when Riot's response omitted the field, or the row predates this feature's
+    // cache migration - distinct from a genuine 0, which only means "at max level" for
+    // championPointsUntilNextLevel. Progress is only shown when both are actually known.
+    val championPointsSinceLastLevel: Long?,
+    val championPointsUntilNextLevel: Long?,
+) {
+    val isMaxLevel: Boolean get() = championPointsUntilNextLevel == 0L
+
+    /** 0f..1f progress within the current level, for a progress-bar fill weight, or null when the
+     * underlying points aren't known (missing from the API response or an unmigrated cache row). */
+    val progressFraction: Float?
+        get() {
+            val since = championPointsSinceLastLevel ?: return null
+            val until = championPointsUntilNextLevel ?: return null
+            if (until == 0L) return 1f
+            val total = since + until
+            if (total <= 0) return null
+            return (since.toFloat() / total).coerceIn(0f, 1f)
+        }
+}
 
 data class ChampionDetail(
     val info: ChampionInfo,

@@ -5,5 +5,7 @@ data class CachedMasteryEntity(
     val championId: Long,
     val championLevel: Int,
     val championPoints: Long,
+    val championPointsSinceLastLevel: Long?,
+    val championPointsUntilNextLevel: Long?,
     val fetchedAt: Long,
 )
