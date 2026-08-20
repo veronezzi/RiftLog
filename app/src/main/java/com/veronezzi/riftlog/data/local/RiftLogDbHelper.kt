@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper
  * plugin can't be applied under AGP 9 either), so this app does the couple of tables by hand
  * instead - same shape (a few tables + a timestamp column per row), no annotation processor.
  */
-class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db", null, 2) {
+class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db", null, 3) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
@@ -81,6 +81,9 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
                 championId INTEGER NOT NULL,
                 championLevel INTEGER NOT NULL,
                 championPoints INTEGER NOT NULL,
+                championPointsSinceLastLevel INTEGER NOT NULL DEFAULT 0,
+                championPointsUntilNextLevel INTEGER NOT NULL DEFAULT 0,
+                tokensEarned INTEGER NOT NULL DEFAULT 0,
                 fetchedAt INTEGER NOT NULL,
                 PRIMARY KEY (puuid, championId)
             )
@@ -105,6 +108,14 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
             db.execSQL("ALTER TABLE cached_matches ADD COLUMN primaryStyleId INTEGER NOT NULL DEFAULT 0")
             db.execSQL("ALTER TABLE cached_matches ADD COLUMN subStyleId INTEGER NOT NULL DEFAULT 0")
             db.execSQL("ALTER TABLE cached_matches ADD COLUMN keystoneId INTEGER NOT NULL DEFAULT 0")
+        }
+        if (oldVersion < 3) {
+            // Mastery-progress columns; existing rows default to 0 until the next refresh
+            // re-fetches them from champion-mastery-v4 (same "stale until re-fetched" pattern
+            // as the rune columns above).
+            db.execSQL("ALTER TABLE cached_masteries ADD COLUMN championPointsSinceLastLevel INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE cached_masteries ADD COLUMN championPointsUntilNextLevel INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE cached_masteries ADD COLUMN tokensEarned INTEGER NOT NULL DEFAULT 0")
         }
     }
 

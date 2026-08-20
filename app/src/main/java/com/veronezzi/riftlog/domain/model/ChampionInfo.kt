@@ -13,7 +13,21 @@ data class ChampionInfo(
 data class ChampionMastery(
     val championLevel: Int,
     val championPoints: Long,
-)
+    val championPointsSinceLastLevel: Long,
+    val championPointsUntilNextLevel: Long, // 0 once Riot reports this champion as max level
+    val tokensEarned: Int,
+) {
+    val isMaxLevel: Boolean get() = championPointsUntilNextLevel <= 0
+
+    /** 0f..1f progress within the current level, for a progress-bar fill weight. */
+    val progressFraction: Float
+        get() {
+            if (isMaxLevel) return 1f
+            val total = championPointsSinceLastLevel + championPointsUntilNextLevel
+            if (total <= 0) return 1f
+            return (championPointsSinceLastLevel.toFloat() / total).coerceIn(0f, 1f)
+        }
+}
 
 data class ChampionDetail(
     val info: ChampionInfo,

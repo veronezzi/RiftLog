@@ -17,6 +17,9 @@ class MasteryDao(private val dbHelper: RiftLogDbHelper) {
                     put("championId", mastery.championId)
                     put("championLevel", mastery.championLevel)
                     put("championPoints", mastery.championPoints)
+                    put("championPointsSinceLastLevel", mastery.championPointsSinceLastLevel)
+                    put("championPointsUntilNextLevel", mastery.championPointsUntilNextLevel)
+                    put("tokensEarned", mastery.tokensEarned)
                     put("fetchedAt", mastery.fetchedAt)
                 }
                 db.replace("cached_masteries", null, values)
@@ -38,6 +41,9 @@ class MasteryDao(private val dbHelper: RiftLogDbHelper) {
                     championId = cursor.getLong(cursor.getColumnIndexOrThrow("championId")),
                     championLevel = cursor.getInt(cursor.getColumnIndexOrThrow("championLevel")),
                     championPoints = cursor.getLong(cursor.getColumnIndexOrThrow("championPoints")),
+                    championPointsSinceLastLevel = cursor.getLong(cursor.getColumnIndexOrThrow("championPointsSinceLastLevel")),
+                    championPointsUntilNextLevel = cursor.getLong(cursor.getColumnIndexOrThrow("championPointsUntilNextLevel")),
+                    tokensEarned = cursor.getInt(cursor.getColumnIndexOrThrow("tokensEarned")),
                     fetchedAt = cursor.getLong(cursor.getColumnIndexOrThrow("fetchedAt")),
                 )
             }

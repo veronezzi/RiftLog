@@ -1,13 +1,17 @@
 package com.veronezzi.riftlog.ui.championstats
 
+import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.veronezzi.riftlog.R
 import com.veronezzi.riftlog.databinding.ItemChampionMasteryCardBinding
+import com.veronezzi.riftlog.domain.model.ChampionMastery
 import com.rifttracker.designsystem.databinding.ViewChampionMasteryCardBinding
 
 private class ChampionDiffCallback : DiffUtil.ItemCallback<ChampionStatsItem>() {
@@ -55,6 +59,33 @@ class ChampionAdapter(private val onClick: (ChampionStatsItem) -> Unit) :
                 val kda = "%.2f".format(aggregate.avgKda)
                 context.getString(
                     R.string.champion_mastery_summary_format, aggregate.gamesPlayed, winRatePercent, kda
+                )
+            }
+
+            bindProgress(mastery, context)
+        }
+
+        private fun bindProgress(mastery: ChampionMastery?, context: Context) {
+            if (mastery == null) {
+                binding.masteryProgressBar.visibility = View.GONE
+                binding.masteryProgressLabel.visibility = View.GONE
+                return
+            }
+            binding.masteryProgressBar.visibility = View.VISIBLE
+            binding.masteryProgressLabel.visibility = View.VISIBLE
+
+            val fraction = mastery.progressFraction
+            (binding.masteryProgressFill.layoutParams as LinearLayout.LayoutParams).weight = fraction
+            (binding.masteryProgressRemainder.layoutParams as LinearLayout.LayoutParams).weight = 1f - fraction
+            binding.masteryProgressBar.requestLayout()
+
+            binding.masteryProgressLabel.text = if (mastery.isMaxLevel) {
+                context.getString(R.string.champion_mastery_max_level)
+            } else {
+                context.getString(
+                    R.string.champion_mastery_progress_format,
+                    mastery.championPointsUntilNextLevel,
+                    mastery.championLevel + 1,
                 )
             }
         }
