@@ -8,6 +8,7 @@
     <string name="nav_settings">Settings</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_champion_detail">Champion</string>
+    <string name="nav_comparison">Compare</string>
     <string name="action_settings">Settings</string>
     <string name="action_back">Back</string>
 
@@ -32,7 +33,17 @@
     <string name="profile_stat_games">Games</string>
     <string name="profile_view_match_history">Match History</string>
     <string name="profile_view_champion_stats">Champion Stats</string>
+    <string name="profile_view_compare">Compare</string>
     <string name="profile_recent_games_label">Last %d games</string>
+
+    <!-- Comparison -->
+    <string name="comparison_vs">VS</string>
+    <string name="comparison_player_b_label">Compare against</string>
+    <string name="comparison_player_b_hint">Riot ID (GameName#Tag)</string>
+    <string name="comparison_player_b_placeholder">Search below</string>
+    <string name="comparison_change_player_b">Compare someone else</string>
+    <string name="comparison_stat_level">Level</string>
+    <string name="comparison_rank_format">%1$s %2$s · %3$d LP</string>
 
     <!-- Errors -->
     <string name="error_invalid_api_key_title">Configuration error</string>
