@@ -34,24 +34,16 @@ data class ParticipantDto(
     val teamPosition: String,
     val totalMinionsKilled: Int,
     val goldEarned: Int,
-    val perks: PerksDto,
+    val perks: PerksDto? = null,
 )
 
 @Serializable
 data class PerksDto(
-    val statPerks: StatPerksDto,
     val styles: List<PerkStyleDto>,
 )
 
-@Serializable
-data class StatPerksDto(
-    val offense: Int,
-    val flex: Int,
-    val defense: Int,
-)
-
-/** One rune tree pick. `description` is "primary" or "sub" - the keystone is `selections[0].perk`
- * of the "primary" style, the rest are the minor rune picks in that tree. */
+/** One rune tree pick. `description` is "primaryStyle" or "subStyle" - the keystone is
+ * `selections[0].perk` of the "primaryStyle" style, the rest are the minor rune picks in that tree. */
 @Serializable
 data class PerkStyleDto(
     val description: String,

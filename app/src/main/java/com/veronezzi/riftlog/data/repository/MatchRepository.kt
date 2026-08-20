@@ -92,6 +92,7 @@ class MatchRepository(
         val recommendedBuild = itemSetCounts.maxByOrNull { it.value }?.key ?: emptyList()
 
         val runePageCounts = matches
+            .filter { it.keystoneId != 0 }
             .map { Triple(it.primaryStyleId, it.subStyleId, it.keystoneId) }
             .groupingBy { it }
             .eachCount()
@@ -132,9 +133,10 @@ class MatchRepository(
         item4 = item4,
         item5 = item5,
         item6 = item6,
-        primaryStyleId = perks.styles.firstOrNull { it.description == "primary" }?.style ?: 0,
-        subStyleId = perks.styles.firstOrNull { it.description == "sub" }?.style ?: 0,
-        keystoneId = perks.styles.firstOrNull { it.description == "primary" }?.selections?.firstOrNull()?.perk ?: 0,
+        primaryStyleId = perks?.styles?.firstOrNull { it.description == "primaryStyle" }?.style ?: 0,
+        subStyleId = perks?.styles?.firstOrNull { it.description == "subStyle" }?.style ?: 0,
+        keystoneId = perks?.styles?.firstOrNull { it.description == "primaryStyle" }
+            ?.selections?.firstOrNull()?.perk ?: 0,
         summoner1Id = summoner1Id,
         summoner2Id = summoner2Id,
         teamPosition = teamPosition,

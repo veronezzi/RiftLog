@@ -124,7 +124,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
-                    android:text="@string/champion_no_recent_games"
+                    android:text="@string/champion_no_recent_runes"
                     android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
                     android:visibility="gone" />
 
