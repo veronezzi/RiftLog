@@ -28,11 +28,20 @@ import com.veronezzi.riftlog.databinding.ActivityMainBinding
  * The Toolbar's back arrow still goes through the standard NavigationUI machinery
  * (setupActionBarWithNavController + AppBarConfiguration), since that part doesn't conflict with
  * the custom bottom-nav listener above - it only reacts to the current destination.
+ *
+ * Because a bottom-nav tab is a top-level destination in [AppBarConfiguration] (no back arrow,
+ * by design), any screen that pushes one of those tab fragments as a stacked destination instead
+ * of switching to it would land on a screen with no visible way back - the toolbar suppresses the
+ * arrow for a top-level id regardless of how it was reached. [switchToTab] is the one path
+ * allowed to land on a tab fragment, so every caller (this activity's own listener, or a fragment
+ * like Profile linking to "view match history") goes through the same pop-to-start-then-navigate
+ * behavior instead of a plain nav action push.
  */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+    private var startDestinationId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(binding.navHostFragment.id) as NavHostFragment
         navController = navHostFragment.navController
-        val startDestinationId = navController.graph.startDestinationId
+        startDestinationId = navController.graph.startDestinationId
 
         val appBarConfiguration = AppBarConfiguration(
             setOf(R.id.homeFragment, R.id.matchHistoryFragment, R.id.championStatsFragment, R.id.buildsFragment)
@@ -51,26 +60,32 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         binding.bottomNav.setOnItemSelectedListener { item ->
-            if (item.itemId != navController.currentDestination?.id) {
-                navController.popBackStack(startDestinationId, false)
-                if (item.itemId != startDestinationId) {
-                    navController.navigate(
-                        item.itemId,
-                        null,
-                        navOptions {
-                            anim {
-                                enter = R.anim.nav_fade_in
-                                exit = R.anim.nav_fade_out
-                            }
-                        },
-                    )
-                }
-            }
+            switchToTab(item.itemId)
             true
         }
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.bottomNav.menu.findItem(destination.id)?.isChecked = true
             invalidateOptionsMenu()
+        }
+    }
+
+    /** Pops to the graph's start destination, then navigates to [tabId] if it isn't the start
+     * destination itself. See the class doc for why every landing on a tab fragment must go
+     * through this instead of a plain nav action. */
+    fun switchToTab(tabId: Int) {
+        if (tabId == navController.currentDestination?.id) return
+        navController.popBackStack(startDestinationId, false)
+        if (tabId != startDestinationId) {
+            navController.navigate(
+                tabId,
+                null,
+                navOptions {
+                    anim {
+                        enter = R.anim.nav_fade_in
+                        exit = R.anim.nav_fade_out
+                    }
+                },
+            )
         }
     }
 

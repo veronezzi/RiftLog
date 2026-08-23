@@ -25,20 +25,6 @@
         <argument android:name="tagLine" app:argType="string" />
         <argument android:name="platformRegion" app:argType="string" />
         <action
-            android:id="@+id/action_profile_to_matchHistory"
-            app:destination="@id/matchHistoryFragment"
-            app:enterAnim="@anim/nav_slide_in_right"
-            app:exitAnim="@anim/nav_slide_out_left"
-            app:popEnterAnim="@anim/nav_slide_in_left"
-            app:popExitAnim="@anim/nav_slide_out_right" />
-        <action
-            android:id="@+id/action_profile_to_championStats"
-            app:destination="@id/championStatsFragment"
-            app:enterAnim="@anim/nav_slide_in_right"
-            app:exitAnim="@anim/nav_slide_out_left"
-            app:popEnterAnim="@anim/nav_slide_in_left"
-            app:popExitAnim="@anim/nav_slide_out_right" />
-        <action
             android:id="@+id/action_profile_to_comparison"
             app:destination="@id/comparisonFragment"
             app:enterAnim="@anim/nav_slide_in_right"
