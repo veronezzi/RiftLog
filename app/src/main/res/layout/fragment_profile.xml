@@ -121,6 +121,14 @@
                 android:layout_marginTop="@dimen/spacing_sm"
                 android:text="@string/profile_view_champion_stats" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/compareButton"
+                style="@style/Widget.RiftTracker.Button.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_sm"
+                android:text="@string/profile_view_compare" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

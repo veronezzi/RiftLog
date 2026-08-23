@@ -67,7 +67,7 @@ class ProfileViewModel(
                     val matchesResult = matchRepository.getRecentMatches(
                         profile.puuid, profile.platformRegion, count = RECENT_MATCH_COUNT, forceRefresh = forceRefresh
                     )
-                    val recentForm = (matchesResult as? ApiResult.Success)?.data?.matches?.let(::toAggregate)
+                    val recentForm = (matchesResult as? ApiResult.Success)?.data?.matches?.toRecentFormAggregate()
                     val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
                         ?: FALLBACK_DDRAGON_VERSION
                     _uiState.value = ProfileUiState.Success(profile, recentForm, version)
@@ -75,14 +75,15 @@ class ProfileViewModel(
             }
         }
     }
+}
 
-    private fun toAggregate(matches: List<MatchSummary>): RecentFormAggregate? {
-        if (matches.isEmpty()) return null
-        val wins = matches.count { it.win }
-        val avgKda = matches.map {
-            val deaths = it.deaths.coerceAtLeast(1)
-            (it.kills + it.assists).toDouble() / deaths
-        }.average()
-        return RecentFormAggregate(matches.size, wins, avgKda)
-    }
+/** Shared with ComparisonViewModel, which computes the same recent-form summary per side. */
+fun List<MatchSummary>.toRecentFormAggregate(): RecentFormAggregate? {
+    if (isEmpty()) return null
+    val wins = count { it.win }
+    val avgKda = map {
+        val deaths = it.deaths.coerceAtLeast(1)
+        (it.kills + it.assists).toDouble() / deaths
+    }.average()
+    return RecentFormAggregate(size, wins, avgKda)
 }

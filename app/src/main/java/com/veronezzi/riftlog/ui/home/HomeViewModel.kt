@@ -9,6 +9,7 @@ import com.veronezzi.riftlog.data.settings.SettingsRepository
 import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.veronezzi.riftlog.domain.model.PlayerProfile
+import com.veronezzi.riftlog.ui.common.RiotIdValidator
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -112,19 +113,17 @@ class HomeViewModel(
     }
 
     fun onSearchSubmitted(rawRiotId: String) {
-        val parts = rawRiotId.trim().split("#")
-        if (parts.size != 2 || parts[0].isBlank() || parts[1].isBlank()) {
+        val parsed = RiotIdValidator.parse(rawRiotId)
+        if (parsed == null) {
             _uiState.value = _uiState.value.copy(inputError = INVALID_FORMAT)
             return
         }
         currentQuery = ""
         _uiState.value = _uiState.value.copy(inputError = null, suggestions = emptyList())
-        val gameName = parts[0].trim()
-        val tagLine = parts[1].trim()
         val region = _uiState.value.selectedRegion
         viewModelScope.launch {
-            settingsRepository.setLastSearch(gameName, tagLine, region)
-            events.send(HomeEvent.NavigateToProfile(gameName, tagLine, region))
+            settingsRepository.setLastSearch(parsed.gameName, parsed.tagLine, region)
+            events.send(HomeEvent.NavigateToProfile(parsed.gameName, parsed.tagLine, region))
         }
     }
 
