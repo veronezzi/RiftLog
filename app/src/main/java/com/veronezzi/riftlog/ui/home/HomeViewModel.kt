@@ -10,6 +10,8 @@ import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.veronezzi.riftlog.domain.model.PlayerProfile
 import com.veronezzi.riftlog.ui.common.RiotIdValidator
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +27,20 @@ sealed class PinnedProfileState {
     data class Error(val recentSearch: RecentSearch) : PinnedProfileState()
 }
 
+/** One row in the Favorites list. Each favorite resolves independently - one broken Riot ID
+ * (renamed, region typo, deleted account) shows as Error but doesn't stop the others from
+ * loading, same principle as the per-side error handling on the comparison screen. */
+sealed class FavoriteState {
+    abstract val recentSearch: RecentSearch
+    data class Loading(override val recentSearch: RecentSearch) : FavoriteState()
+    data class Loaded(
+        override val recentSearch: RecentSearch,
+        val profile: PlayerProfile,
+        val ddragonVersion: String,
+    ) : FavoriteState()
+    data class Error(override val recentSearch: RecentSearch) : FavoriteState()
+}
+
 private const val MAX_SUGGESTIONS = 5
 
 data class HomeUiState(
@@ -33,6 +49,7 @@ data class HomeUiState(
     val pinned: PinnedProfileState = PinnedProfileState.None,
     val inputError: String? = null,
     val suggestions: List<RecentSearch> = emptyList(),
+    val favorites: List<FavoriteState> = emptyList(),
 )
 
 sealed class HomeEvent {
@@ -78,6 +95,50 @@ class HomeViewModel(
                 searchHistory = history
                 _uiState.value = _uiState.value.copy(suggestions = filteredSuggestions())
             }
+        }
+        viewModelScope.launch {
+            settingsRepository.favorites.collectLatest { favorites -> loadFavorites(favorites) }
+        }
+    }
+
+    /** Re-fetches every favorite whenever the list changes (add/remove/reorder). Wasteful to
+     * re-fetch ones that didn't change, but the list is small and getProfile is already
+     * TTL-cached, so in practice this only ever hits the network for genuinely new entries. */
+    private fun loadFavorites(favorites: List<RecentSearch>) {
+        _uiState.value = _uiState.value.copy(favorites = favorites.map { FavoriteState.Loading(it) })
+        viewModelScope.launch {
+            val resolved = favorites.map { favorite ->
+                async {
+                    when (val result = profileRepository.getProfile(
+                        favorite.gameName, favorite.tagLine, favorite.platformRegion
+                    )) {
+                        is ApiResult.Error -> FavoriteState.Error(favorite)
+                        is ApiResult.Success -> {
+                            val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
+                                ?: FALLBACK_DDRAGON_VERSION
+                            FavoriteState.Loaded(favorite, result.data, version)
+                        }
+                    }
+                }
+            }.awaitAll()
+            _uiState.value = _uiState.value.copy(favorites = resolved)
+        }
+    }
+
+    fun onFavoriteTapped(recentSearch: RecentSearch) {
+        viewModelScope.launch {
+            settingsRepository.setLastSearch(recentSearch.gameName, recentSearch.tagLine, recentSearch.platformRegion)
+            events.send(
+                HomeEvent.NavigateToProfile(recentSearch.gameName, recentSearch.tagLine, recentSearch.platformRegion)
+            )
+        }
+    }
+
+    fun onFavoriteRemoveClicked(recentSearch: RecentSearch) {
+        viewModelScope.launch {
+            settingsRepository.removeFavorite(
+                recentSearch.gameName, recentSearch.tagLine, recentSearch.platformRegion
+            )
         }
     }
 

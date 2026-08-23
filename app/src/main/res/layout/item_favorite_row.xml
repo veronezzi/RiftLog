@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:padding="@dimen/spacing_md">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/favoriteRowAvatar"
+        style="@style/Widget.RiftTracker.Avatar.Small"
+        android:contentDescription="@null" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/spacing_sm"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/favoriteRowName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.RiftTracker.Body"
+            tools:text="Veronezzi#13518" />
+
+        <TextView
+            android:id="@+id/favoriteRowSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xxs"
+            android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+            tools:text="Level 419" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/favoriteRowRemove"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/home_remove_favorite"
+        android:src="@drawable/ic_close"
+        app:tint="@color/rift_on_surface_muted" />
+
+</LinearLayout>

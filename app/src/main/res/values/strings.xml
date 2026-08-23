@@ -20,6 +20,10 @@
     <string name="home_recent_label">Recent</string>
     <string name="home_error_invalid_riot_id">Enter your Riot ID as GameName#Tag</string>
     <string name="home_unpin_profile">Remove pinned profile</string>
+    <string name="home_favorites_label">Favorites</string>
+    <string name="home_favorites_empty">No favorites yet. Tap the star on a profile to add it here.</string>
+    <string name="home_favorite_unavailable">Couldn\'t load</string>
+    <string name="home_remove_favorite">Remove favorite</string>
 
     <!-- Profile -->
     <string name="profile_level_format">Level %d</string>
@@ -35,6 +39,8 @@
     <string name="profile_view_champion_stats">Champion Stats</string>
     <string name="profile_view_compare">Compare</string>
     <string name="profile_recent_games_label">Last %d games</string>
+    <string name="profile_add_favorite">Add to favorites</string>
+    <string name="profile_remove_favorite">Remove from favorites</string>
 
     <!-- Comparison -->
     <string name="comparison_vs">VS</string>
