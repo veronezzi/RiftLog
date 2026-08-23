@@ -62,6 +62,8 @@
     <string name="champion_mastery_points_format">%,d pontos de maestria</string>
     <string name="champion_mastery_no_recent_games">Nenhuma partida recente</string>
     <string name="champion_mastery_summary_format">%1$d partidas · %2$d%% de vitórias · %3$s KDA</string>
+    <string name="champion_mastery_progress_format">Faltam %1$,d pontos para M%2$d</string>
+    <string name="champion_mastery_max_level">Nível máximo de maestria</string>
 
     <!-- Champion detail -->
     <string name="label_abilities">Habilidades</string>
