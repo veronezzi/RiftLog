@@ -69,6 +69,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             )
         }
         emptyStateBinding.emptyStateRetryButton.setOnClickListener { viewModel.retry() }
+        binding.favoriteButton.setOnClickListener { viewModel.onFavoriteToggled() }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -112,6 +113,17 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         binding.kdaStatCard.statLabel.text = getString(R.string.profile_stat_kda)
         binding.gamesStatCard.statValue.text = "${form?.gamesPlayed ?: 0}"
         binding.gamesStatCard.statLabel.text = getString(R.string.profile_stat_games)
+
+        binding.favoriteButton.contentDescription = getString(
+            if (state.isFavorite) R.string.profile_remove_favorite else R.string.profile_add_favorite
+        )
+        binding.favoriteButton.imageTintList = android.content.res.ColorStateList.valueOf(
+            androidx.core.content.ContextCompat.getColor(
+                requireContext(),
+                if (state.isFavorite) com.rifttracker.designsystem.R.color.rank_gold
+                else com.rifttracker.designsystem.R.color.rift_on_surface_muted
+            )
+        )
     }
 
     private fun findRank(profile: PlayerProfile, queueType: String): RankEntry? =

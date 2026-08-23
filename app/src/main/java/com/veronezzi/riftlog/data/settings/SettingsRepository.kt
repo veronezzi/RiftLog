@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.veronezzi.riftlog.data.remote.RegionMapper
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -31,6 +32,7 @@ class SettingsRepository(private val context: Context) {
         val LAST_PROFILE_PUUID = stringPreferencesKey("last_profile_puuid")
         val LAST_PROFILE_REGION = stringPreferencesKey("last_profile_region")
         val SEARCH_HISTORY = stringPreferencesKey("search_history_json")
+        val FAVORITES = stringPreferencesKey("favorites_json")
     }
 
     val platformRegion: Flow<String> = context.dataStore.data.map {
@@ -62,6 +64,15 @@ class SettingsRepository(private val context: Context) {
             runCatching { json.decodeFromString(searchHistorySerializer, it) }.getOrDefault(emptyList())
         } ?: emptyList()
     }
+
+    /** User-curated list of Riot IDs to keep an eye on - friends, duo partners, rivals. Unlike
+     * SEARCH_HISTORY (an incidental log the app keeps for autocomplete) this is explicit and has
+     * no size cap or TTL: an entry only leaves the list when the user removes it. */
+    val favorites: Flow<List<RecentSearch>> = context.dataStore.data.map { prefs ->
+        prefs[Keys.FAVORITES]?.let {
+            runCatching { json.decodeFromString(searchHistorySerializer, it) }.getOrDefault(emptyList())
+        } ?: emptyList()
+    }.distinctUntilChanged()
 
     suspend fun setPlatformRegion(platformRegion: String) {
         require(platformRegion in RegionMapper.platformIds) {
@@ -102,6 +113,45 @@ class SettingsRepository(private val context: Context) {
             }
             val updated = (listOf(entry) + deduped).take(MAX_SEARCH_HISTORY)
             prefs[Keys.SEARCH_HISTORY] = json.encodeToString(searchHistorySerializer, updated)
+        }
+    }
+
+    /** Adds a Riot ID to favorites, deduped case-insensitively on name+tag+region so favoriting
+     * the same account twice (e.g. rapid double-tap on the star) is a no-op instead of a dupe row. */
+    suspend fun addFavorite(gameName: String, tagLine: String, platformRegion: String) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[Keys.FAVORITES]?.let {
+                runCatching { json.decodeFromString(searchHistorySerializer, it) }.getOrDefault(emptyList())
+            } ?: emptyList()
+            val alreadyFavorited = current.any {
+                it.gameName.equals(gameName, ignoreCase = true) &&
+                    it.tagLine.equals(tagLine, ignoreCase = true) &&
+                    it.platformRegion == platformRegion
+            }
+            if (!alreadyFavorited) {
+                val updated = current + RecentSearch(gameName, tagLine, platformRegion)
+                prefs[Keys.FAVORITES] = json.encodeToString(searchHistorySerializer, updated)
+            }
+        }
+    }
+
+    /** Removing an already-absent favorite (e.g. a duplicate tap) is a harmless no-op - skips the
+     * write entirely rather than re-persisting an unchanged list, which would otherwise trigger a
+     * spurious [favorites] emission (and, for a never-favorited user, materialize an empty list
+     * under a key that was previously absent). */
+    suspend fun removeFavorite(gameName: String, tagLine: String, platformRegion: String) {
+        context.dataStore.edit { prefs ->
+            val current = prefs[Keys.FAVORITES]?.let {
+                runCatching { json.decodeFromString(searchHistorySerializer, it) }.getOrDefault(emptyList())
+            } ?: emptyList()
+            val updated = current.filterNot {
+                it.gameName.equals(gameName, ignoreCase = true) &&
+                    it.tagLine.equals(tagLine, ignoreCase = true) &&
+                    it.platformRegion == platformRegion
+            }
+            if (updated.size != current.size) {
+                prefs[Keys.FAVORITES] = json.encodeToString(searchHistorySerializer, updated)
+            }
         }
     }
 

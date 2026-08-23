@@ -18,7 +18,9 @@ import com.veronezzi.riftlog.R
 import com.veronezzi.riftlog.RiftLogApplication
 import com.veronezzi.riftlog.data.remote.RegionMapper
 import com.veronezzi.riftlog.data.remote.ddragon.DDragonUrls
+import com.veronezzi.riftlog.data.settings.RecentSearch
 import com.veronezzi.riftlog.databinding.FragmentHomeBinding
+import com.veronezzi.riftlog.databinding.ItemFavoriteRowBinding
 import com.veronezzi.riftlog.ui.common.RegionDisplay
 import com.google.android.material.chip.Chip
 import kotlinx.coroutines.launch
@@ -86,12 +88,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     }
                     renderPinned(state.pinned)
                     renderSuggestions(state.suggestions)
+                    renderFavorites(state.favorites)
                 }
             }
         }
     }
 
-    private fun renderSuggestions(suggestions: List<com.veronezzi.riftlog.data.settings.RecentSearch>) {
+    private fun renderSuggestions(suggestions: List<RecentSearch>) {
         binding.suggestionsContainer.removeAllViews()
         binding.suggestionsCard.visibility = if (suggestions.isEmpty()) View.GONE else View.VISIBLE
         val paddingPx = resources.getDimensionPixelSize(com.rifttracker.designsystem.R.dimen.spacing_md)
@@ -108,6 +111,47 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 setOnClickListener { viewModel.onSuggestionTapped(suggestion) }
             }
             binding.suggestionsContainer.addView(row)
+        }
+    }
+
+    private fun renderFavorites(favorites: List<FavoriteState>) {
+        binding.favoritesEmptyText.visibility = if (favorites.isEmpty()) View.VISIBLE else View.GONE
+        binding.favoritesContainer.removeAllViews()
+        favorites.forEach { favoriteState ->
+            val rowBinding = ItemFavoriteRowBinding.inflate(layoutInflater, binding.favoritesContainer, false)
+            bindFavoriteRow(rowBinding, favoriteState)
+            binding.favoritesContainer.addView(rowBinding.root)
+        }
+    }
+
+    private fun bindFavoriteRow(rowBinding: ItemFavoriteRowBinding, favoriteState: FavoriteState) {
+        val recentSearch = favoriteState.recentSearch
+        rowBinding.root.setOnClickListener { viewModel.onFavoriteTapped(recentSearch) }
+        rowBinding.favoriteRowRemove.setOnClickListener { viewModel.onFavoriteRemoveClicked(recentSearch) }
+        when (favoriteState) {
+            is FavoriteState.Loading -> {
+                rowBinding.favoriteRowName.text = "${recentSearch.gameName}#${recentSearch.tagLine}"
+                rowBinding.favoriteRowSubtitle.text = null
+                rowBinding.favoriteRowAvatar.setImageResource(R.drawable.bg_skeleton_block)
+            }
+            is FavoriteState.Error -> {
+                rowBinding.favoriteRowName.text =
+                    "${recentSearch.gameName}#${recentSearch.tagLine} (${RegionDisplay.labelFor(recentSearch.platformRegion)})"
+                rowBinding.favoriteRowSubtitle.text = getString(R.string.home_favorite_unavailable)
+                rowBinding.favoriteRowAvatar.setImageResource(R.drawable.bg_skeleton_block)
+            }
+            is FavoriteState.Loaded -> {
+                val profile = favoriteState.profile
+                rowBinding.favoriteRowName.text = "${profile.gameName}#${profile.tagLine}"
+                rowBinding.favoriteRowSubtitle.text =
+                    getString(R.string.profile_level_format, profile.summonerLevel.toInt())
+                rowBinding.favoriteRowAvatar.load(
+                    DDragonUrls.profileIcon(favoriteState.ddragonVersion, profile.profileIconId)
+                ) {
+                    placeholder(R.drawable.bg_skeleton_block)
+                    error(R.drawable.bg_skeleton_block)
+                }
+            }
         }
     }
 

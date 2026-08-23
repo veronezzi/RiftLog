@@ -20,6 +20,10 @@
     <string name="home_recent_label">Recentes</string>
     <string name="home_error_invalid_riot_id">Digite seu Riot ID no formato NomeDoJogo#TAG</string>
     <string name="home_unpin_profile">Remover perfil fixado</string>
+    <string name="home_favorites_label">Favoritos</string>
+    <string name="home_favorites_empty">Nenhum favorito ainda. Toque na estrela de um perfil para adicioná-lo aqui.</string>
+    <string name="home_favorite_unavailable">Não foi possível carregar</string>
+    <string name="home_remove_favorite">Remover favorito</string>
 
     <!-- Profile -->
     <string name="profile_level_format">Nível %d</string>
@@ -35,6 +39,8 @@
     <string name="profile_view_champion_stats">Estatísticas de Campeões</string>
     <string name="profile_view_compare">Comparar</string>
     <string name="profile_recent_games_label">Últimas %d partidas</string>
+    <string name="profile_add_favorite">Adicionar aos favoritos</string>
+    <string name="profile_remove_favorite">Remover dos favoritos</string>
 
     <!-- Comparison -->
     <string name="comparison_vs">VS</string>

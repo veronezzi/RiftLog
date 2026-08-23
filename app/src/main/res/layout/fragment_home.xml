@@ -76,6 +76,41 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_lg"
+            android:text="@string/home_favorites_label"
+            android:textAppearance="@style/TextAppearance.RiftTracker.LabelUppercase" />
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.RiftTracker.CardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_sm">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/favoritesEmptyText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/spacing_md"
+                    android:text="@string/home_favorites_empty"
+                    android:textAppearance="@style/TextAppearance.RiftTracker.BodySmall"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/favoritesContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/riotIdInputLayout"
             style="@style/Widget.RiftTracker.TextInputLayout"
