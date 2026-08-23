@@ -28,4 +28,15 @@ object RankComparator {
 
         return a.leaguePoints - b.leaguePoints
     }
+
+    /** Collapses tier + division + LP into one increasing number, for plotting rank progression
+     * on a single axis. Same ordering as [compare]: each tier is worth 400 "points" (100 per
+     * division), plus the raw LP within it. An unrecognized tier/division falls back to index 0
+     * (bottom of the scale) rather than -400/-100, so a bad API value doesn't plot as more
+     * negative than IRON IV. */
+    fun numericValue(tier: String, rank: String, leaguePoints: Int): Int {
+        val tierIndex = TIER_ORDER.indexOf(tier.uppercase()).coerceAtLeast(0)
+        val divisionIndex = DIVISION_ORDER.indexOf(rank.uppercase()).coerceAtLeast(0)
+        return tierIndex * 400 + divisionIndex * 100 + leaguePoints
+    }
 }

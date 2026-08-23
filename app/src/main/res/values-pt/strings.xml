@@ -35,6 +35,7 @@
     <string name="profile_view_champion_stats">Estatísticas de Campeões</string>
     <string name="profile_view_compare">Comparar</string>
     <string name="profile_recent_games_label">Últimas %d partidas</string>
+    <string name="profile_rank_history_empty">Ainda não há histórico suficiente. Volte depois de mais algumas partidas ranqueadas.</string>
 
     <!-- Comparison -->
     <string name="comparison_vs">VS</string>

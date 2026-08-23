@@ -68,6 +68,20 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_md" />
 
+            <include
+                android:id="@+id/soloRankHistoryCard"
+                layout="@layout/view_rank_history_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md" />
+
+            <include
+                android:id="@+id/flexRankHistoryCard"
+                layout="@layout/view_rank_history_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_md" />
+
             <TextView
                 android:id="@+id/recentGamesLabel"
                 android:layout_width="wrap_content"

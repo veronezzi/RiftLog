@@ -4,6 +4,7 @@ import android.app.Application
 import com.veronezzi.riftlog.data.local.MasteryDao
 import com.veronezzi.riftlog.data.local.MatchDao
 import com.veronezzi.riftlog.data.local.ProfileDao
+import com.veronezzi.riftlog.data.local.RankHistoryDao
 import com.veronezzi.riftlog.data.local.RiftLogDbHelper
 import com.veronezzi.riftlog.data.local.StaticDataDao
 import com.veronezzi.riftlog.data.remote.RiotApiClient
@@ -36,6 +37,7 @@ class RiftLogApplication : Application() {
     private val profileDao: ProfileDao by lazy { ProfileDao(dbHelper) }
     private val matchDao: MatchDao by lazy { MatchDao(dbHelper) }
     private val masteryDao: MasteryDao by lazy { MasteryDao(dbHelper) }
+    private val rankHistoryDao: RankHistoryDao by lazy { RankHistoryDao(dbHelper) }
     private val staticDataDao: StaticDataDao by lazy { StaticDataDao(dbHelper) }
 
     private val riotApiClient: RiotApiClient by lazy { RiotApiClient() }
@@ -53,7 +55,7 @@ class RiftLogApplication : Application() {
     }
 
     val profileRepository: ProfileRepository by lazy {
-        ProfileRepository(riotApiClient, profileDao)
+        ProfileRepository(riotApiClient, profileDao, rankHistoryDao)
     }
 
     val matchRepository: MatchRepository by lazy {
