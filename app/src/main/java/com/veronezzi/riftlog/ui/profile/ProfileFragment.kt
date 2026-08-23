@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.initializer
 import androidx.navigation.fragment.findNavController
 import coil.load
+import com.veronezzi.riftlog.MainActivity
 import com.veronezzi.riftlog.R
 import com.veronezzi.riftlog.RiftLogApplication
 import com.veronezzi.riftlog.data.remote.ddragon.DDragonUrls
@@ -55,11 +56,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentProfileBinding.bind(view)
         _emptyStateBinding = ViewEmptyStateBinding.bind(binding.emptyState)
+        // Match History and Champion Stats are bottom-nav tabs (top-level destinations, no back
+        // arrow by design) - switching to them the same way the bottom nav itself does, instead
+        // of pushing them via a nav action, is what keeps that back arrow's absence from stranding
+        // the user. See MainActivity.switchToTab's doc for the full reasoning.
         binding.matchHistoryButton.setOnClickListener {
-            findNavController().navigate(R.id.action_profile_to_matchHistory)
+            (requireActivity() as MainActivity).switchToTab(R.id.matchHistoryFragment)
         }
         binding.championStatsButton.setOnClickListener {
-            findNavController().navigate(R.id.action_profile_to_championStats)
+            (requireActivity() as MainActivity).switchToTab(R.id.championStatsFragment)
         }
         binding.compareButton.setOnClickListener {
             findNavController().navigate(
