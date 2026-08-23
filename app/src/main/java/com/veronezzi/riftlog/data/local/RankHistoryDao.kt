@@ -19,7 +19,9 @@ class RankHistoryDao(private val dbHelper: RiftLogDbHelper) {
         val last = db.query(
             "rank_snapshots", arrayOf("tier", "rank", "leaguePoints"),
             "puuid = ? AND queueType = ?", arrayOf(snapshot.puuid, snapshot.queueType),
-            null, null, "timestamp DESC", "1"
+            // rowid as the tiebreaker (not just timestamp) so a device clock jumping backwards
+            // can't make an older-timestamped-but-earlier-inserted row look "most recent".
+            null, null, "timestamp DESC, rowid DESC", "1"
         ).use { cursor ->
             if (!cursor.moveToFirst()) null
             else Triple(cursor.getString(0), cursor.getString(1), cursor.getInt(2))
@@ -47,9 +49,9 @@ class RankHistoryDao(private val dbHelper: RiftLogDbHelper) {
     private fun pruneOldSnapshots(db: SQLiteDatabase, puuid: String, queueType: String) {
         db.execSQL(
             """
-            DELETE FROM rank_snapshots WHERE puuid = ? AND queueType = ? AND timestamp NOT IN (
-                SELECT timestamp FROM rank_snapshots WHERE puuid = ? AND queueType = ?
-                ORDER BY timestamp DESC LIMIT $MAX_SNAPSHOTS_PER_QUEUE
+            DELETE FROM rank_snapshots WHERE puuid = ? AND queueType = ? AND rowid NOT IN (
+                SELECT rowid FROM rank_snapshots WHERE puuid = ? AND queueType = ?
+                ORDER BY timestamp DESC, rowid DESC LIMIT $MAX_SNAPSHOTS_PER_QUEUE
             )
             """.trimIndent(),
             arrayOf(puuid, queueType, puuid, queueType)
@@ -62,7 +64,7 @@ class RankHistoryDao(private val dbHelper: RiftLogDbHelper) {
         withContext(Dispatchers.IO) {
             dbHelper.readableDatabase.query(
                 "rank_snapshots", null, "puuid = ? AND queueType = ?", arrayOf(puuid, queueType),
-                null, null, "timestamp DESC", MAX_SNAPSHOTS_PER_QUEUE.toString()
+                null, null, "timestamp DESC, rowid DESC", MAX_SNAPSHOTS_PER_QUEUE.toString()
             ).use { cursor ->
                 val results = mutableListOf<RankSnapshotEntity>()
                 while (cursor.moveToNext()) {

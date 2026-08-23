@@ -83,4 +83,22 @@ class RankComparatorTest {
         val ironFour = RankComparator.numericValue("IRON", "IV", 50)
         assertEquals(ironFour, unknownTier)
     }
+
+    @Test
+    fun `numericValue treats master, grandmaster and challenger as one continuous LP ladder`() {
+        val masterHighLp = RankComparator.numericValue("MASTER", "I", 700)
+        val grandmasterLowLp = RankComparator.numericValue("GRANDMASTER", "I", 200)
+        // Deliberate divergence from compare(), which always ranks GRANDMASTER above MASTER
+        // regardless of LP: on a single player's own progression chart, LP is what actually moves,
+        // and banding apex tiers into separate 400-point blocks would draw a cliff for a promotion
+        // that changed nothing about the player's LP. See the numericValue KDoc.
+        assertTrue(masterHighLp > grandmasterLowLp)
+    }
+
+    @Test
+    fun `numericValue does not jump when LP is unchanged across the master to grandmaster promotion`() {
+        val masterAtLp = RankComparator.numericValue("MASTER", "I", 900)
+        val grandmasterAtSameLp = RankComparator.numericValue("GRANDMASTER", "I", 900)
+        assertEquals(masterAtLp, grandmasterAtSameLp)
+    }
 }
