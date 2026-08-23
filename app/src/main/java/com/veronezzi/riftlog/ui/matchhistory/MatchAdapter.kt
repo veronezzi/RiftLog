@@ -23,9 +23,10 @@ private class MatchDiffCallback : DiffUtil.ItemCallback<MatchSummary>() {
     override fun areContentsTheSame(oldItem: MatchSummary, newItem: MatchSummary) = oldItem == newItem
 }
 
-class MatchAdapter(private var ddragonVersion: String) : ListAdapter<MatchSummary, MatchAdapter.MatchViewHolder>(MatchDiffCallback()) {
-
-    private val expandedMatchIds = mutableSetOf<String>()
+class MatchAdapter(
+    private var ddragonVersion: String,
+    private val onMatchClick: (String) -> Unit,
+) : ListAdapter<MatchSummary, MatchAdapter.MatchViewHolder>(MatchDiffCallback()) {
 
     fun updateVersion(version: String) {
         ddragonVersion = version
@@ -38,10 +39,7 @@ class MatchAdapter(private var ddragonVersion: String) : ListAdapter<MatchSummar
 
     override fun onBindViewHolder(holder: MatchViewHolder, position: Int) {
         val match = getItem(position)
-        holder.bind(match, ddragonVersion, expandedMatchIds.contains(match.matchId)) {
-            if (!expandedMatchIds.add(match.matchId)) expandedMatchIds.remove(match.matchId)
-            notifyItemChanged(position)
-        }
+        holder.bind(match, ddragonVersion) { onMatchClick(match.matchId) }
     }
 
     class MatchViewHolder(private val binding: ItemMatchRowBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -57,7 +55,7 @@ class MatchAdapter(private var ddragonVersion: String) : ListAdapter<MatchSummar
             card.matchItem6,
         )
 
-        fun bind(match: MatchSummary, ddragonVersion: String, expanded: Boolean, onToggle: () -> Unit) {
+        fun bind(match: MatchSummary, ddragonVersion: String, onClick: () -> Unit) {
             val context = binding.root.context
 
             card.matchChampionIcon.imageTintList = null
@@ -100,14 +98,7 @@ class MatchAdapter(private var ddragonVersion: String) : ListAdapter<MatchSummar
                 }
             }
 
-            binding.detailRow.visibility = if (expanded) View.VISIBLE else View.GONE
-            binding.detailCs.text = "${match.totalMinionsKilled} CS"
-            binding.detailGold.text = context.getString(R.string.match_gold_format, match.goldEarned / 1000.0)
-            val minutes = match.gameDurationSeconds / 60
-            val seconds = match.gameDurationSeconds % 60
-            binding.detailDuration.text = "${minutes}m ${seconds}s"
-
-            binding.root.setOnClickListener { onToggle() }
+            binding.root.setOnClickListener { onClick() }
         }
     }
 }

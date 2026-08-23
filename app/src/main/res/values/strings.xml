@@ -69,7 +69,6 @@
     <string name="match_history_empty_title">No matches yet</string>
     <string name="match_history_empty_message">Search a summoner from Home to load their match history.</string>
     <string name="match_history_load_more">Load more</string>
-    <string name="match_gold_format">%.1fk gold</string>
 
     <!-- Champion stats -->
     <string name="champion_stats_empty_title">No champion data yet</string>
@@ -82,6 +81,14 @@
     <string name="champion_mastery_summary_format">%1$d games · %2$d%% winrate · %3$s KDA</string>
     <string name="champion_mastery_progress_format">%1$,d points to M%2$d</string>
     <string name="champion_mastery_max_level">Max mastery level</string>
+
+    <!-- Match detail -->
+    <string name="nav_match_detail">Match</string>
+    <string name="match_detail_victory">Victory</string>
+    <string name="match_detail_defeat">Defeat</string>
+    <string name="match_detail_team_header_format">%1$s · %2$d Barons · %3$d Dragons · %4$d Towers</string>
+    <string name="match_detail_kda_format">%1$d / %2$d / %3$d · %4$.2f KDA</string>
+    <string name="match_detail_stats_format">%1$d CS · %2$.1fk dmg · %3$d vision</string>
 
     <!-- Champion detail -->
     <string name="label_abilities">Abilities</string>

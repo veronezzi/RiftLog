@@ -1,14 +1,18 @@
 package com.veronezzi.riftlog.data.repository
 
+import com.veronezzi.riftlog.data.local.FullMatchDao
 import com.veronezzi.riftlog.data.local.MatchDao
 import com.veronezzi.riftlog.data.local.entities.CachedMatchEntity
+import com.veronezzi.riftlog.data.local.entities.FullMatchCacheEntity
 import com.veronezzi.riftlog.data.remote.RegionMapper
 import com.veronezzi.riftlog.data.remote.RiotApiClient
+import com.veronezzi.riftlog.data.remote.riot.dto.MatchInfoDto
 import com.veronezzi.riftlog.data.remote.riot.dto.ParticipantDto
 import com.veronezzi.riftlog.data.remote.safeApiCall
 import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.domain.model.ChampionAggregate
 import com.veronezzi.riftlog.domain.model.MatchSummary
+import kotlinx.serialization.json.Json
 
 private const val LIVE_DATA_TTL_MILLIS = 5 * 60 * 1000L
 
@@ -26,7 +30,10 @@ data class MatchPage(val matches: List<MatchSummary>, val hasMore: Boolean)
 class MatchRepository(
     private val apiClient: RiotApiClient,
     private val matchDao: MatchDao,
+    private val fullMatchDao: FullMatchDao,
 ) {
+
+    private val json = Json { ignoreUnknownKeys = true }
 
     suspend fun getRecentMatches(
         puuid: String,
@@ -58,6 +65,7 @@ class MatchRepository(
 
         val now = System.currentTimeMillis()
         val newEntities = mutableListOf<CachedMatchEntity>()
+        val newFullMatches = mutableListOf<FullMatchCacheEntity>()
         for (matchId in idsToFetch) {
             val matchResult = safeApiCall { regionalApi.getMatchDetail(matchId) }
             val match = when (matchResult) {
@@ -66,18 +74,52 @@ class MatchRepository(
                     // Persist whatever we already fetched before propagating the error, so a
                     // transient failure partway through doesn't discard earlier successful fetches.
                     if (newEntities.isNotEmpty()) matchDao.upsertMatches(newEntities)
+                    if (newFullMatches.isNotEmpty()) newFullMatches.forEach { fullMatchDao.upsert(it) }
                     return matchResult
                 }
             }
+            // Full-match cache: independent of whether the viewer's own participant is found
+            // below, since the detail screen needs every match regardless of who's asking.
+            newFullMatches += FullMatchCacheEntity(
+                matchId = matchId,
+                json = json.encodeToString(MatchInfoDto.serializer(), match.info),
+                fetchedAt = now,
+            )
             val participant = match.info.participants.firstOrNull { it.puuid == puuid } ?: continue
             newEntities += participant.toEntity(matchId, puuid, match.info.gameDuration, match.info.gameCreation, now)
         }
         if (newEntities.isNotEmpty()) {
             matchDao.upsertMatches(newEntities)
         }
+        newFullMatches.forEach { fullMatchDao.upsert(it) }
 
         val allMatches = matchDao.getMatchesForPuuid(puuid)
         return ApiResult.Success(MatchPage(allMatches.take(count).map { it.toDomain() }, hasMore))
+    }
+
+    /** Fetch-on-demand for the match-detail screen: cache hit first, otherwise pulls the match
+     * fresh from Riot (same endpoint [getRecentMatches] already uses) and caches it - covers
+     * matches persisted before this cache table existed, or ones evicted by "clear cached data". */
+    suspend fun getMatchDetail(matchId: String, platformRegion: String): ApiResult<MatchInfoDto> {
+        fullMatchDao.get(matchId)?.let {
+            return ApiResult.Success(json.decodeFromString(MatchInfoDto.serializer(), it.json))
+        }
+        val regionalApi = apiClient.regionalApi(RegionMapper.regionalRoutingFor(platformRegion))
+        val matchResult = safeApiCall { regionalApi.getMatchDetail(matchId) }
+        return when (matchResult) {
+            is ApiResult.Error -> matchResult
+            is ApiResult.Success -> {
+                val info = matchResult.data.info
+                fullMatchDao.upsert(
+                    FullMatchCacheEntity(
+                        matchId = matchId,
+                        json = json.encodeToString(MatchInfoDto.serializer(), info),
+                        fetchedAt = System.currentTimeMillis(),
+                    )
+                )
+                ApiResult.Success(info)
+            }
+        }
     }
 
     suspend fun getChampionAggregate(puuid: String, championName: String): ChampionAggregate? {

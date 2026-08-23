@@ -23,6 +23,8 @@ sealed class MatchHistoryUiState {
         val ddragonVersion: String,
         val isLoadingMore: Boolean,
         val canLoadMore: Boolean,
+        val puuid: String,
+        val platformRegion: String,
     ) : MatchHistoryUiState()
 }
 
@@ -92,6 +94,8 @@ class MatchHistoryViewModel(
                         ddragonVersion = version,
                         isLoadingMore = false,
                         canLoadMore = page.hasMore,
+                        puuid = puuid,
+                        platformRegion = platformRegion,
                     )
                 }
             }

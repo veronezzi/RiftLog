@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper
  * plugin can't be applied under AGP 9 either), so this app does the couple of tables by hand
  * instead - same shape (a few tables + a timestamp column per row), no annotation processor.
  */
-class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db", null, 4) {
+class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db", null, 5) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
@@ -99,6 +99,7 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
             """.trimIndent()
         )
         db.execSQL(RANK_SNAPSHOTS_CREATE_SQL)
+        db.execSQL(FULL_MATCH_CACHE_CREATE_SQL)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -120,6 +121,13 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
             // New table for the rank-history graph on the Profile screen.
             db.execSQL(RANK_SNAPSHOTS_CREATE_SQL)
         }
+        if (oldVersion < 5) {
+            // New table for the match-detail screen: the full all-participants/teams payload,
+            // stored as a JSON blob (same pattern as static_data_cache) rather than normalized
+            // columns. Matches fetched before this migration simply have no row here yet - the
+            // detail screen re-fetches on a cache miss instead of treating that as an error.
+            db.execSQL(FULL_MATCH_CACHE_CREATE_SQL)
+        }
     }
 
     /** Wipes every cache table. Used by Settings' "clear cached data" action. */
@@ -129,7 +137,7 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
         try {
             for (table in listOf(
                 "cached_profiles", "cached_rank_entries", "cached_matches",
-                "cached_masteries", "static_data_cache", "rank_snapshots",
+                "cached_masteries", "static_data_cache", "rank_snapshots", "full_match_cache",
             )) {
                 db.delete(table, null, null)
             }
@@ -148,6 +156,14 @@ class RiftLogDbHelper(context: Context) : SQLiteOpenHelper(context, "riftlog.db"
                 rank TEXT NOT NULL,
                 leaguePoints INTEGER NOT NULL,
                 timestamp INTEGER NOT NULL
+            )
+        """.trimIndent()
+
+        val FULL_MATCH_CACHE_CREATE_SQL = """
+            CREATE TABLE full_match_cache (
+                matchId TEXT PRIMARY KEY,
+                json TEXT NOT NULL,
+                fetchedAt INTEGER NOT NULL
             )
         """.trimIndent()
     }
