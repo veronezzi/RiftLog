@@ -39,6 +39,7 @@
     <string name="profile_view_champion_stats">Champion Stats</string>
     <string name="profile_view_compare">Compare</string>
     <string name="profile_recent_games_label">Last %d games</string>
+    <string name="profile_rank_history_empty">Not enough history yet. Come back after a few more ranked games.</string>
     <string name="profile_add_favorite">Add to favorites</string>
     <string name="profile_remove_favorite">Remove from favorites</string>
 

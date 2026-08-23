@@ -28,4 +28,27 @@ object RankComparator {
 
         return a.leaguePoints - b.leaguePoints
     }
+
+    /** Collapses tier + division + LP into one increasing number, for plotting rank progression
+     * on a single axis. Below MASTER this matches [compare]'s ordering: each tier is worth 400
+     * "points" (100 per division) plus the raw LP within it. An unrecognized tier/division falls
+     * back to index 0 (bottom of the scale) rather than -400/-100, so a bad API value doesn't plot
+     * as more negative than IRON IV.
+     *
+     * MASTER/GRANDMASTER/CHALLENGER deliberately do NOT get their own 400-point bands, and this
+     * is the one place [numericValue] disagrees with [compare]: those tiers have no division and
+     * Riot ranks them on one continuous LP ladder that commonly runs into the thousands, so
+     * banding by tier there would make a player's own LP jumping the GM cutoff (LP unchanged)
+     * plot as a 400-point cliff on their own history chart - a far more visible wrongness than
+     * disagreeing with [compare] on a cross-tier comparison nobody is charting. A high-LP MASTER
+     * can therefore plot above a low-LP GRANDMASTER here even though [compare] ranks GRANDMASTER
+     * strictly higher; that reflects the real ladder better for this axis's purpose (one player's
+     * progression over time), not a bug to reconcile. */
+    fun numericValue(tier: String, rank: String, leaguePoints: Int): Int {
+        val tierIndex = TIER_ORDER.indexOf(tier.uppercase()).coerceAtLeast(0)
+        val apexIndex = TIER_ORDER.indexOf("MASTER")
+        if (tierIndex >= apexIndex) return apexIndex * 400 + leaguePoints
+        val divisionIndex = DIVISION_ORDER.indexOf(rank.uppercase()).coerceAtLeast(0)
+        return tierIndex * 400 + divisionIndex * 100 + leaguePoints
+    }
 }

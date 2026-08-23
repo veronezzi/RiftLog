@@ -16,8 +16,11 @@ import com.veronezzi.riftlog.R
 import com.veronezzi.riftlog.RiftLogApplication
 import com.veronezzi.riftlog.data.remote.ddragon.DDragonUrls
 import com.veronezzi.riftlog.databinding.FragmentProfileBinding
+import com.veronezzi.riftlog.databinding.ViewRankHistoryCardBinding
 import com.veronezzi.riftlog.domain.model.PlayerProfile
 import com.veronezzi.riftlog.domain.model.RankEntry
+import com.veronezzi.riftlog.domain.model.RankSnapshot
+import com.veronezzi.riftlog.ui.comparison.RankComparator
 import com.veronezzi.riftlog.ui.common.RankTierColor
 import com.veronezzi.riftlog.ui.common.bindError
 import com.veronezzi.riftlog.ui.common.setSkeletonVisible
@@ -105,6 +108,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         bindRankCard(binding.soloDuoRankCard, getString(R.string.profile_solo_duo), findRank(profile, "RANKED_SOLO_5x5"))
         bindRankCard(binding.flexRankCard, getString(R.string.profile_flex), findRank(profile, "RANKED_FLEX_SR"))
 
+        bindRankHistoryCard(binding.soloRankHistoryCard, getString(R.string.profile_solo_duo), state.soloRankHistory)
+        bindRankHistoryCard(binding.flexRankHistoryCard, getString(R.string.profile_flex), state.flexRankHistory)
+
         val form = state.recentForm
         binding.recentGamesLabel.text = getString(R.string.profile_recent_games_label, form?.gamesPlayed ?: 0)
         binding.winrateStatCard.statValue.text = "${form?.winRatePercent ?: 0}%"
@@ -153,6 +159,24 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val winRate = if (total == 0) 0 else ((rank.wins * 100.0) / total).roundToInt()
         rankCardBinding.recordText.text = getString(R.string.profile_record_format, rank.wins, rank.losses, winRate)
         rankCardBinding.winrateBar.progress = winRate
+    }
+
+    private fun bindRankHistoryCard(
+        cardBinding: ViewRankHistoryCardBinding,
+        queueLabel: String,
+        history: List<RankSnapshot>,
+    ) {
+        cardBinding.rankHistoryTitle.text = queueLabel
+        val hasEnoughData = history.size >= RankHistoryChartView.MIN_POINTS_TO_RENDER
+        cardBinding.rankHistoryChart.visibility = if (hasEnoughData) View.VISIBLE else View.GONE
+        cardBinding.rankHistoryEmptyText.visibility = if (hasEnoughData) View.GONE else View.VISIBLE
+        if (hasEnoughData) {
+            cardBinding.rankHistoryChart.setValues(
+                history.map { RankComparator.numericValue(it.tier, it.rank, it.leaguePoints) }
+            )
+        } else {
+            cardBinding.rankHistoryEmptyText.text = getString(R.string.profile_rank_history_empty)
+        }
     }
 
     override fun onDestroyView() {

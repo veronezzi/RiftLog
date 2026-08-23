@@ -1,14 +1,17 @@
 package com.veronezzi.riftlog.data.repository
 
 import com.veronezzi.riftlog.data.local.ProfileDao
+import com.veronezzi.riftlog.data.local.RankHistoryDao
 import com.veronezzi.riftlog.data.local.entities.CachedProfileEntity
 import com.veronezzi.riftlog.data.local.entities.CachedRankEntryEntity
+import com.veronezzi.riftlog.data.local.entities.RankSnapshotEntity
 import com.veronezzi.riftlog.data.remote.RegionMapper
 import com.veronezzi.riftlog.data.remote.RiotApiClient
 import com.veronezzi.riftlog.data.remote.safeApiCall
 import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.domain.model.PlayerProfile
 import com.veronezzi.riftlog.domain.model.RankEntry
+import com.veronezzi.riftlog.domain.model.RankSnapshot
 
 private const val LIVE_DATA_TTL_MILLIS = 5 * 60 * 1000L
 
@@ -16,6 +19,7 @@ private const val LIVE_DATA_TTL_MILLIS = 5 * 60 * 1000L
 class ProfileRepository(
     private val apiClient: RiotApiClient,
     private val profileDao: ProfileDao,
+    private val rankHistoryDao: RankHistoryDao,
 ) {
 
     suspend fun getProfile(
@@ -88,6 +92,20 @@ class ProfileRepository(
                 )
             }
         )
+        // Snapshot for the rank-history graph. Only reached on a real fetch (see the TTL check
+        // above), never on a cache hit, so reopening the profile repeatedly doesn't spam points.
+        for (entry in leagueEntries) {
+            rankHistoryDao.recordSnapshotIfChanged(
+                RankSnapshotEntity(
+                    puuid = account.puuid,
+                    queueType = entry.queueType,
+                    tier = entry.tier,
+                    rank = entry.rank,
+                    leaguePoints = entry.leaguePoints,
+                    timestamp = now,
+                )
+            )
+        }
 
         return ApiResult.Success(
             PlayerProfile(
@@ -103,6 +121,11 @@ class ProfileRepository(
             )
         )
     }
+
+    suspend fun getRankHistory(puuid: String, queueType: String): List<RankSnapshot> =
+        rankHistoryDao.getSnapshots(puuid, queueType).map {
+            RankSnapshot(it.tier, it.rank, it.leaguePoints, it.timestamp)
+        }
 
     private fun CachedProfileEntity.toDomain(rankEntries: List<CachedRankEntryEntity>) = PlayerProfile(
         puuid = puuid,

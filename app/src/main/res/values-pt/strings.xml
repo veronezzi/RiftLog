@@ -39,6 +39,7 @@
     <string name="profile_view_champion_stats">Estatísticas de Campeões</string>
     <string name="profile_view_compare">Comparar</string>
     <string name="profile_recent_games_label">Últimas %d partidas</string>
+    <string name="profile_rank_history_empty">Ainda não há histórico suficiente. Volte depois de mais algumas partidas ranqueadas.</string>
     <string name="profile_add_favorite">Adicionar aos favoritos</string>
     <string name="profile_remove_favorite">Remover dos favoritos</string>
 

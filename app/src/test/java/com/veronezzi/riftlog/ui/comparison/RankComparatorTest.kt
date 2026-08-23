@@ -60,4 +60,45 @@ class RankComparatorTest {
         val iron = rank("IRON", "IV", 0)
         assertTrue(RankComparator.compare(unknown, iron) < 0)
     }
+
+    @Test
+    fun `numericValue increases with tier, division and LP in that priority order`() {
+        val ironFour = RankComparator.numericValue("IRON", "IV", 0)
+        val ironOne = RankComparator.numericValue("IRON", "I", 0)
+        val bronzeFour = RankComparator.numericValue("BRONZE", "IV", 0)
+        assertTrue(ironFour < ironOne)
+        assertTrue(ironOne < bronzeFour)
+    }
+
+    @Test
+    fun `numericValue matches compare ordering for same-tier climb`() {
+        val lowLp = RankComparator.numericValue("GOLD", "II", 10)
+        val highLp = RankComparator.numericValue("GOLD", "II", 80)
+        assertTrue(lowLp < highLp)
+    }
+
+    @Test
+    fun `numericValue falls back to the bottom of the scale for an unrecognized tier or division`() {
+        val unknownTier = RankComparator.numericValue("UNRANKED_GARBAGE", "IV", 50)
+        val ironFour = RankComparator.numericValue("IRON", "IV", 50)
+        assertEquals(ironFour, unknownTier)
+    }
+
+    @Test
+    fun `numericValue treats master, grandmaster and challenger as one continuous LP ladder`() {
+        val masterHighLp = RankComparator.numericValue("MASTER", "I", 700)
+        val grandmasterLowLp = RankComparator.numericValue("GRANDMASTER", "I", 200)
+        // Deliberate divergence from compare(), which always ranks GRANDMASTER above MASTER
+        // regardless of LP: on a single player's own progression chart, LP is what actually moves,
+        // and banding apex tiers into separate 400-point blocks would draw a cliff for a promotion
+        // that changed nothing about the player's LP. See the numericValue KDoc.
+        assertTrue(masterHighLp > grandmasterLowLp)
+    }
+
+    @Test
+    fun `numericValue does not jump when LP is unchanged across the master to grandmaster promotion`() {
+        val masterAtLp = RankComparator.numericValue("MASTER", "I", 900)
+        val grandmasterAtSameLp = RankComparator.numericValue("GRANDMASTER", "I", 900)
+        assertEquals(masterAtLp, grandmasterAtSameLp)
+    }
 }

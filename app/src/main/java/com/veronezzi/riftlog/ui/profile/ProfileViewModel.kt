@@ -11,6 +11,7 @@ import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.veronezzi.riftlog.domain.model.MatchSummary
 import com.veronezzi.riftlog.domain.model.PlayerProfile
+import com.veronezzi.riftlog.domain.model.RankSnapshot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -31,6 +32,8 @@ sealed class ProfileUiState {
         val profile: PlayerProfile,
         val recentForm: RecentFormAggregate?,
         val ddragonVersion: String,
+        val soloRankHistory: List<RankSnapshot>,
+        val flexRankHistory: List<RankSnapshot>,
         val isFavorite: Boolean = false,
     ) : ProfileUiState()
     data class Error(val error: ApiResult.Error) : ProfileUiState()
@@ -109,7 +112,11 @@ class ProfileViewModel(
                     val recentForm = (matchesResult as? ApiResult.Success)?.data?.matches?.toRecentFormAggregate()
                     val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
                         ?: FALLBACK_DDRAGON_VERSION
-                    _uiState.value = ProfileUiState.Success(profile, recentForm, version, isFavorited(profile))
+                    val soloHistory = profileRepository.getRankHistory(profile.puuid, "RANKED_SOLO_5x5")
+                    val flexHistory = profileRepository.getRankHistory(profile.puuid, "RANKED_FLEX_SR")
+                    _uiState.value = ProfileUiState.Success(
+                        profile, recentForm, version, soloHistory, flexHistory, isFavorited(profile)
+                    )
                 }
             }
         }
