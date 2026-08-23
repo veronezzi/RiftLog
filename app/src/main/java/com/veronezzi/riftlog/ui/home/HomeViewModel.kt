@@ -13,12 +13,15 @@ import com.veronezzi.riftlog.ui.common.RiotIdValidator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 sealed class PinnedProfileState {
     object None : PinnedProfileState()
@@ -42,6 +45,7 @@ sealed class FavoriteState {
 }
 
 private const val MAX_SUGGESTIONS = 5
+private const val FAVORITE_FETCH_CONCURRENCY = 4
 
 data class HomeUiState(
     val selectedRegion: String = SettingsRepository.DEFAULT_PLATFORM_REGION,
@@ -103,26 +107,37 @@ class HomeViewModel(
 
     /** Re-fetches every favorite whenever the list changes (add/remove/reorder). Wasteful to
      * re-fetch ones that didn't change, but the list is small and getProfile is already
-     * TTL-cached, so in practice this only ever hits the network for genuinely new entries. */
-    private fun loadFavorites(favorites: List<RecentSearch>) {
+     * TTL-cached, so in practice this only ever hits the network for genuinely new entries.
+     *
+     * Runs inside the collector's own coroutine (via [coroutineScope], not a fresh
+     * [viewModelScope] launch) so a newer emission actually cancels an in-flight resolve instead
+     * of racing it - otherwise a slow fetch for a list that's since had an entry removed could
+     * finish after the up-to-date fetch and overwrite it, resurrecting the removed favorite.
+     * Each favorite's fetch is wrapped in [runCatching] so an unexpected throw (a corrupt
+     * region string in stored data, a local DB error) only fails that one row instead of
+     * cancelling every sibling in the same `async` batch and crashing the screen. Concurrency
+     * is capped so a long favorites list can't fire dozens of Riot API calls at once. */
+    private suspend fun loadFavorites(favorites: List<RecentSearch>) {
         _uiState.value = _uiState.value.copy(favorites = favorites.map { FavoriteState.Loading(it) })
-        viewModelScope.launch {
-            val resolved = favorites.map { favorite ->
+        val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
+            ?: FALLBACK_DDRAGON_VERSION
+        val gate = Semaphore(FAVORITE_FETCH_CONCURRENCY)
+        val resolved = coroutineScope {
+            favorites.map { favorite ->
                 async {
-                    when (val result = profileRepository.getProfile(
-                        favorite.gameName, favorite.tagLine, favorite.platformRegion
-                    )) {
-                        is ApiResult.Error -> FavoriteState.Error(favorite)
-                        is ApiResult.Success -> {
-                            val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
-                                ?: FALLBACK_DDRAGON_VERSION
-                            FavoriteState.Loaded(favorite, result.data, version)
+                    gate.withPermit {
+                        val result = runCatching {
+                            profileRepository.getProfile(favorite.gameName, favorite.tagLine, favorite.platformRegion)
+                        }.getOrNull()
+                        when (result) {
+                            is ApiResult.Success -> FavoriteState.Loaded(favorite, result.data, version)
+                            is ApiResult.Error, null -> FavoriteState.Error(favorite)
                         }
                     }
                 }
             }.awaitAll()
-            _uiState.value = _uiState.value.copy(favorites = resolved)
         }
+        _uiState.value = _uiState.value.copy(favorites = resolved)
     }
 
     fun onFavoriteTapped(recentSearch: RecentSearch) {

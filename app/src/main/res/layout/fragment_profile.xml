@@ -58,6 +58,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/profile_add_favorite"
                     android:src="@drawable/ic_star"
                     app:tint="@color/rift_on_surface_muted" />
             </LinearLayout>

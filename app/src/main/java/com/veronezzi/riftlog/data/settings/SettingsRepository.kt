@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.veronezzi.riftlog.data.remote.RegionMapper
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -71,7 +72,7 @@ class SettingsRepository(private val context: Context) {
         prefs[Keys.FAVORITES]?.let {
             runCatching { json.decodeFromString(searchHistorySerializer, it) }.getOrDefault(emptyList())
         } ?: emptyList()
-    }
+    }.distinctUntilChanged()
 
     suspend fun setPlatformRegion(platformRegion: String) {
         require(platformRegion in RegionMapper.platformIds) {
@@ -134,7 +135,10 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
-    /** Removing an already-absent favorite (e.g. a duplicate tap) is a harmless no-op. */
+    /** Removing an already-absent favorite (e.g. a duplicate tap) is a harmless no-op - skips the
+     * write entirely rather than re-persisting an unchanged list, which would otherwise trigger a
+     * spurious [favorites] emission (and, for a never-favorited user, materialize an empty list
+     * under a key that was previously absent). */
     suspend fun removeFavorite(gameName: String, tagLine: String, platformRegion: String) {
         context.dataStore.edit { prefs ->
             val current = prefs[Keys.FAVORITES]?.let {
@@ -145,7 +149,9 @@ class SettingsRepository(private val context: Context) {
                     it.tagLine.equals(tagLine, ignoreCase = true) &&
                     it.platformRegion == platformRegion
             }
-            prefs[Keys.FAVORITES] = json.encodeToString(searchHistorySerializer, updated)
+            if (updated.size != current.size) {
+                prefs[Keys.FAVORITES] = json.encodeToString(searchHistorySerializer, updated)
+            }
         }
     }
 

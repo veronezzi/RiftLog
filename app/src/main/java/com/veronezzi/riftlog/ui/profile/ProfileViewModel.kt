@@ -69,9 +69,11 @@ class ProfileViewModel(
     // hitting the network again. See MatchHistoryViewModel.retry() for the same fix.
     fun retry() = load(forceRefresh = true)
 
-    /** Optimistic: flips the UI immediately so rapid taps feel responsive, then persists. Both
-     * addFavorite and removeFavorite are idempotent, so a double-tap racing the DataStore write
-     * can't produce a duplicate or get the list stuck. */
+    /** Optimistic: flips the UI immediately so rapid taps feel responsive, then persists. The
+     * final state always matches whatever [SettingsRepository.favorites] settles on (see the
+     * collector above), which in turn matches the last DataStore write to actually land - writes
+     * are serialized by DataStore itself in call order, not reordered by this code. addFavorite
+     * and removeFavorite are also idempotent, so a double-tap can't produce a duplicate. */
     fun onFavoriteToggled() {
         val state = _uiState.value as? ProfileUiState.Success ?: return
         val profile = state.profile
