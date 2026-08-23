@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.veronezzi.riftlog.data.repository.ChampionRepository
 import com.veronezzi.riftlog.data.repository.MatchRepository
 import com.veronezzi.riftlog.data.repository.ProfileRepository
+import com.veronezzi.riftlog.data.settings.RecentSearch
 import com.veronezzi.riftlog.data.settings.SettingsRepository
 import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
@@ -13,6 +14,7 @@ import com.veronezzi.riftlog.domain.model.PlayerProfile
 import com.veronezzi.riftlog.domain.model.RankSnapshot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 private const val RECENT_MATCH_COUNT = 20
@@ -32,6 +34,7 @@ sealed class ProfileUiState {
         val ddragonVersion: String,
         val soloRankHistory: List<RankSnapshot>,
         val flexRankHistory: List<RankSnapshot>,
+        val isFavorite: Boolean = false,
     ) : ProfileUiState()
     data class Error(val error: ApiResult.Error) : ProfileUiState()
 }
@@ -49,14 +52,50 @@ class ProfileViewModel(
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState
 
+    private var favorites: List<RecentSearch> = emptyList()
+
     init {
         load(forceRefresh = false)
+        viewModelScope.launch {
+            settingsRepository.favorites.collectLatest { favs ->
+                favorites = favs
+                val current = _uiState.value
+                if (current is ProfileUiState.Success) {
+                    _uiState.value = current.copy(isFavorite = isFavorited(current.profile))
+                }
+            }
+        }
     }
 
     // Bypasses the cache: otherwise a retry right after a mid-fetch match-list failure can land
     // on the partial page that failure already persisted (still TTL-fresh) instead of actually
     // hitting the network again. See MatchHistoryViewModel.retry() for the same fix.
     fun retry() = load(forceRefresh = true)
+
+    /** Optimistic: flips the UI immediately so rapid taps feel responsive, then persists. The
+     * final state always matches whatever [SettingsRepository.favorites] settles on (see the
+     * collector above), which in turn matches the last DataStore write to actually land - writes
+     * are serialized by DataStore itself in call order, not reordered by this code. addFavorite
+     * and removeFavorite are also idempotent, so a double-tap can't produce a duplicate. */
+    fun onFavoriteToggled() {
+        val state = _uiState.value as? ProfileUiState.Success ?: return
+        val profile = state.profile
+        val makeFavorite = !state.isFavorite
+        _uiState.value = state.copy(isFavorite = makeFavorite)
+        viewModelScope.launch {
+            if (makeFavorite) {
+                settingsRepository.addFavorite(profile.gameName, profile.tagLine, profile.platformRegion)
+            } else {
+                settingsRepository.removeFavorite(profile.gameName, profile.tagLine, profile.platformRegion)
+            }
+        }
+    }
+
+    private fun isFavorited(profile: PlayerProfile): Boolean = favorites.any {
+        it.gameName.equals(profile.gameName, ignoreCase = true) &&
+            it.tagLine.equals(profile.tagLine, ignoreCase = true) &&
+            it.platformRegion == profile.platformRegion
+    }
 
     private fun load(forceRefresh: Boolean) {
         _uiState.value = ProfileUiState.Loading
@@ -75,7 +114,9 @@ class ProfileViewModel(
                         ?: FALLBACK_DDRAGON_VERSION
                     val soloHistory = profileRepository.getRankHistory(profile.puuid, "RANKED_SOLO_5x5")
                     val flexHistory = profileRepository.getRankHistory(profile.puuid, "RANKED_FLEX_SR")
-                    _uiState.value = ProfileUiState.Success(profile, recentForm, version, soloHistory, flexHistory)
+                    _uiState.value = ProfileUiState.Success(
+                        profile, recentForm, version, soloHistory, flexHistory, isFavorited(profile)
+                    )
                 }
             }
         }

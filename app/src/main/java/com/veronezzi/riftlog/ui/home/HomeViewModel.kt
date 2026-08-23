@@ -10,13 +10,18 @@ import com.veronezzi.riftlog.domain.ApiResult
 import com.veronezzi.riftlog.data.remote.ddragon.FALLBACK_DDRAGON_VERSION
 import com.veronezzi.riftlog.domain.model.PlayerProfile
 import com.veronezzi.riftlog.ui.common.RiotIdValidator
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 sealed class PinnedProfileState {
     object None : PinnedProfileState()
@@ -25,7 +30,22 @@ sealed class PinnedProfileState {
     data class Error(val recentSearch: RecentSearch) : PinnedProfileState()
 }
 
+/** One row in the Favorites list. Each favorite resolves independently - one broken Riot ID
+ * (renamed, region typo, deleted account) shows as Error but doesn't stop the others from
+ * loading, same principle as the per-side error handling on the comparison screen. */
+sealed class FavoriteState {
+    abstract val recentSearch: RecentSearch
+    data class Loading(override val recentSearch: RecentSearch) : FavoriteState()
+    data class Loaded(
+        override val recentSearch: RecentSearch,
+        val profile: PlayerProfile,
+        val ddragonVersion: String,
+    ) : FavoriteState()
+    data class Error(override val recentSearch: RecentSearch) : FavoriteState()
+}
+
 private const val MAX_SUGGESTIONS = 5
+private const val FAVORITE_FETCH_CONCURRENCY = 4
 
 data class HomeUiState(
     val selectedRegion: String = SettingsRepository.DEFAULT_PLATFORM_REGION,
@@ -33,6 +53,7 @@ data class HomeUiState(
     val pinned: PinnedProfileState = PinnedProfileState.None,
     val inputError: String? = null,
     val suggestions: List<RecentSearch> = emptyList(),
+    val favorites: List<FavoriteState> = emptyList(),
 )
 
 sealed class HomeEvent {
@@ -78,6 +99,61 @@ class HomeViewModel(
                 searchHistory = history
                 _uiState.value = _uiState.value.copy(suggestions = filteredSuggestions())
             }
+        }
+        viewModelScope.launch {
+            settingsRepository.favorites.collectLatest { favorites -> loadFavorites(favorites) }
+        }
+    }
+
+    /** Re-fetches every favorite whenever the list changes (add/remove/reorder). Wasteful to
+     * re-fetch ones that didn't change, but the list is small and getProfile is already
+     * TTL-cached, so in practice this only ever hits the network for genuinely new entries.
+     *
+     * Runs inside the collector's own coroutine (via [coroutineScope], not a fresh
+     * [viewModelScope] launch) so a newer emission actually cancels an in-flight resolve instead
+     * of racing it - otherwise a slow fetch for a list that's since had an entry removed could
+     * finish after the up-to-date fetch and overwrite it, resurrecting the removed favorite.
+     * Each favorite's fetch is wrapped in [runCatching] so an unexpected throw (a corrupt
+     * region string in stored data, a local DB error) only fails that one row instead of
+     * cancelling every sibling in the same `async` batch and crashing the screen. Concurrency
+     * is capped so a long favorites list can't fire dozens of Riot API calls at once. */
+    private suspend fun loadFavorites(favorites: List<RecentSearch>) {
+        _uiState.value = _uiState.value.copy(favorites = favorites.map { FavoriteState.Loading(it) })
+        val version = (championRepository.getLatestVersion() as? ApiResult.Success)?.data
+            ?: FALLBACK_DDRAGON_VERSION
+        val gate = Semaphore(FAVORITE_FETCH_CONCURRENCY)
+        val resolved = coroutineScope {
+            favorites.map { favorite ->
+                async {
+                    gate.withPermit {
+                        val result = runCatching {
+                            profileRepository.getProfile(favorite.gameName, favorite.tagLine, favorite.platformRegion)
+                        }.getOrNull()
+                        when (result) {
+                            is ApiResult.Success -> FavoriteState.Loaded(favorite, result.data, version)
+                            is ApiResult.Error, null -> FavoriteState.Error(favorite)
+                        }
+                    }
+                }
+            }.awaitAll()
+        }
+        _uiState.value = _uiState.value.copy(favorites = resolved)
+    }
+
+    fun onFavoriteTapped(recentSearch: RecentSearch) {
+        viewModelScope.launch {
+            settingsRepository.setLastSearch(recentSearch.gameName, recentSearch.tagLine, recentSearch.platformRegion)
+            events.send(
+                HomeEvent.NavigateToProfile(recentSearch.gameName, recentSearch.tagLine, recentSearch.platformRegion)
+            )
+        }
+    }
+
+    fun onFavoriteRemoveClicked(recentSearch: RecentSearch) {
+        viewModelScope.launch {
+            settingsRepository.removeFavorite(
+                recentSearch.gameName, recentSearch.tagLine, recentSearch.platformRegion
+            )
         }
     }
 
