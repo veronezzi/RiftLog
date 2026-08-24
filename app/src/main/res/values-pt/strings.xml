@@ -69,7 +69,6 @@
     <string name="match_history_empty_title">Nenhuma partida encontrada ainda</string>
     <string name="match_history_empty_message">Busque um invocador na tela inicial para carregar o histórico de partidas.</string>
     <string name="match_history_load_more">Carregar mais</string>
-    <string name="match_gold_format">%.1fk de ouro</string>
 
     <!-- Champion stats -->
     <string name="champion_stats_empty_title">Nenhum dado de campeão ainda</string>
@@ -82,6 +81,14 @@
     <string name="champion_mastery_summary_format">%1$d partidas · %2$d%% de vitórias · %3$s KDA</string>
     <string name="champion_mastery_progress_format">Faltam %1$,d pontos para M%2$d</string>
     <string name="champion_mastery_max_level">Nível máximo de maestria</string>
+
+    <!-- Match detail -->
+    <string name="nav_match_detail">Partida</string>
+    <string name="match_detail_victory">Vitória</string>
+    <string name="match_detail_defeat">Derrota</string>
+    <string name="match_detail_team_header_format">%1$s · %2$d Barões · %3$d Dragões · %4$d Torres</string>
+    <string name="match_detail_kda_format">%1$d / %2$d / %3$d · %4$.2f KDA</string>
+    <string name="match_detail_stats_format">%1$d de CS · %2$.1fk de dano · %3$d de visão</string>
 
     <!-- Champion detail -->
     <string name="label_abilities">Habilidades</string>

@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.initializer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.veronezzi.riftlog.R
 import com.veronezzi.riftlog.RiftLogApplication
@@ -26,6 +27,8 @@ class MatchHistoryFragment : Fragment(R.layout.fragment_match_history) {
     private var _emptyStateBinding: ViewEmptyStateBinding? = null
     private val emptyStateBinding get() = _emptyStateBinding!!
     private var adapter: MatchAdapter? = null
+    private var puuid: String? = null
+    private var platformRegion: String? = null
 
     private val viewModel: MatchHistoryViewModel by viewModels {
         viewModelFactory {
@@ -39,7 +42,7 @@ class MatchHistoryFragment : Fragment(R.layout.fragment_match_history) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentMatchHistoryBinding.bind(view)
         _emptyStateBinding = ViewEmptyStateBinding.bind(binding.emptyState)
-        val matchAdapter = MatchAdapter(ddragonVersion = FALLBACK_DDRAGON_VERSION)
+        val matchAdapter = MatchAdapter(ddragonVersion = FALLBACK_DDRAGON_VERSION) { matchId -> navigateToMatchDetail(matchId) }
         adapter = matchAdapter
         binding.matchList.layoutManager = LinearLayoutManager(requireContext())
         binding.matchList.adapter = matchAdapter
@@ -75,12 +78,27 @@ class MatchHistoryFragment : Fragment(R.layout.fragment_match_history) {
                 onRetry = { viewModel.retry() },
             )
             is MatchHistoryUiState.Success -> {
+                puuid = state.puuid
+                platformRegion = state.platformRegion
                 adapter?.updateVersion(state.ddragonVersion)
                 adapter?.submitList(state.matches)
                 binding.loadMoreButton.visibility = if (state.canLoadMore) View.VISIBLE else View.GONE
                 binding.loadMoreButton.isEnabled = !state.isLoadingMore
             }
         }
+    }
+
+    private fun navigateToMatchDetail(matchId: String) {
+        val puuid = puuid ?: return
+        val platformRegion = platformRegion ?: return
+        findNavController().navigate(
+            R.id.action_matchHistory_to_matchDetail,
+            Bundle().apply {
+                putString("matchId", matchId)
+                putString("platformRegion", platformRegion)
+                putString("puuid", puuid)
+            },
+        )
     }
 
     override fun onDestroyView() {
