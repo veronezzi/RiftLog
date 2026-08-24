@@ -10,13 +10,28 @@ import kotlinx.coroutines.withContext
  * the tracked player's own row and must keep working unchanged. */
 class FullMatchDao(private val dbHelper: RiftLogDbHelper) {
 
-    suspend fun upsert(entity: FullMatchCacheEntity) = withContext(Dispatchers.IO) {
-        val values = ContentValues().apply {
-            put("matchId", entity.matchId)
-            put("json", entity.json)
-            put("fetchedAt", entity.fetchedAt)
+    suspend fun upsert(entity: FullMatchCacheEntity) = upsertAll(listOf(entity))
+
+    /** Batches every insert into one transaction - upserting one at a time in a loop would
+     * otherwise be a separate uncommitted disk write per match on a multi-match refresh, unlike
+     * MatchDao's batch upsert. */
+    suspend fun upsertAll(entities: List<FullMatchCacheEntity>) = withContext(Dispatchers.IO) {
+        if (entities.isEmpty()) return@withContext
+        val db = dbHelper.writableDatabase
+        db.beginTransaction()
+        try {
+            for (entity in entities) {
+                val values = ContentValues().apply {
+                    put("matchId", entity.matchId)
+                    put("json", entity.json)
+                    put("fetchedAt", entity.fetchedAt)
+                }
+                db.replace("full_match_cache", null, values)
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
         }
-        dbHelper.writableDatabase.replace("full_match_cache", null, values)
     }
 
     suspend fun get(matchId: String): FullMatchCacheEntity? = withContext(Dispatchers.IO) {

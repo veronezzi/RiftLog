@@ -74,7 +74,7 @@ class MatchRepository(
                     // Persist whatever we already fetched before propagating the error, so a
                     // transient failure partway through doesn't discard earlier successful fetches.
                     if (newEntities.isNotEmpty()) matchDao.upsertMatches(newEntities)
-                    if (newFullMatches.isNotEmpty()) newFullMatches.forEach { fullMatchDao.upsert(it) }
+                    fullMatchDao.upsertAll(newFullMatches)
                     return matchResult
                 }
             }
@@ -91,7 +91,7 @@ class MatchRepository(
         if (newEntities.isNotEmpty()) {
             matchDao.upsertMatches(newEntities)
         }
-        newFullMatches.forEach { fullMatchDao.upsert(it) }
+        fullMatchDao.upsertAll(newFullMatches)
 
         val allMatches = matchDao.getMatchesForPuuid(puuid)
         return ApiResult.Success(MatchPage(allMatches.take(count).map { it.toDomain() }, hasMore))
@@ -101,9 +101,12 @@ class MatchRepository(
      * fresh from Riot (same endpoint [getRecentMatches] already uses) and caches it - covers
      * matches persisted before this cache table existed, or ones evicted by "clear cached data". */
     suspend fun getMatchDetail(matchId: String, platformRegion: String): ApiResult<MatchInfoDto> {
-        fullMatchDao.get(matchId)?.let {
-            return ApiResult.Success(json.decodeFromString(MatchInfoDto.serializer(), it.json))
-        }
+        // A cached blob that fails to decode (a future field added to ParticipantDto without a
+        // default, a corrupted row) falls through to a live re-fetch instead of crashing - the
+        // network path below is already guarded by safeApiCall, this cache-hit path wasn't.
+        fullMatchDao.get(matchId)
+            ?.let { runCatching { json.decodeFromString(MatchInfoDto.serializer(), it.json) }.getOrNull() }
+            ?.let { return ApiResult.Success(it) }
         val regionalApi = apiClient.regionalApi(RegionMapper.regionalRoutingFor(platformRegion))
         val matchResult = safeApiCall { regionalApi.getMatchDetail(matchId) }
         return when (matchResult) {

@@ -47,7 +47,6 @@ class MatchDetailFragment : Fragment(R.layout.fragment_match_detail) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentMatchDetailBinding.bind(view)
         _emptyStateBinding = ViewEmptyStateBinding.bind(binding.emptyState)
-        emptyStateBinding.emptyStateRetryButton.setOnClickListener { viewModel.retry() }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state -> render(state) }

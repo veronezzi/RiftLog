@@ -42,7 +42,8 @@ data class ParticipantDto(
     // the viewer-only path above never reads these). Real Riot Games' match-v5 field names.
     /** The player's current Riot ID name at fetch time. Can be null/blank on some older or
      * edge-case matches (Riot's docs don't guarantee it's always populated) - callers must fall
-     * back to something else (e.g. puuid) rather than assume it's always usable. */
+     * back to something else (MatchDetailMapper falls back to the champion name) rather than
+     * assume it's always usable. */
     val riotIdGameName: String? = null,
     val riotIdTagline: String? = null,
     val teamId: Int = 0,
@@ -64,17 +65,20 @@ data class TeamDto(
  * `first` flag this app doesn't use). Field names below match match-v5 exactly. */
 @Serializable
 data class ObjectivesDto(
-    val baron: ObjectiveDto,
-    val dragon: ObjectiveDto,
-    val tower: ObjectiveDto,
-    val inhibitor: ObjectiveDto,
-    val riftHerald: ObjectiveDto,
-    val champion: ObjectiveDto,
+    // Defaulted rather than required: Riot marks these 6 as required today, but a missing key
+    // here would otherwise fail the entire match fetch (not just objectives display) - same
+    // lesson as the champion-mastery fields elsewhere in this app.
+    val baron: ObjectiveDto = ObjectiveDto(),
+    val dragon: ObjectiveDto = ObjectiveDto(),
+    val tower: ObjectiveDto = ObjectiveDto(),
+    val inhibitor: ObjectiveDto = ObjectiveDto(),
+    val riftHerald: ObjectiveDto = ObjectiveDto(),
+    val champion: ObjectiveDto = ObjectiveDto(),
 )
 
 @Serializable
 data class ObjectiveDto(
-    val kills: Int,
+    val kills: Int = 0,
 )
 
 @Serializable
